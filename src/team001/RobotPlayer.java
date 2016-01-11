@@ -8,14 +8,16 @@ public class RobotPlayer {
 	private static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
             Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	private static Random rand;
+	private static RobotController rc;
+//	private static 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
      **/
 //    @SuppressWarnings("unused")
-    public static void run(RobotController rc) {
-    	System.out.println("here");
+    public static void run(RobotController rc1) {
         // You can instantiate variables here.
+		rc = rc1;
         rand = new Random(rc.getID());
         int myAttackRange = 0;
         Team myTeam = rc.getTeam();
@@ -67,34 +69,34 @@ public class RobotPlayer {
                 if (rc.isCoreReady()) {
                     if (fate < 800) {
                         // Choose a random direction to try to move in
-//                        Direction dirToMove = directions[fate % 8];
-//                        // Check the rubble in that direction
-//                        if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
-//                            // Too much rubble, so I should clear it
-//                            rc.clearRubble(dirToMove);
-//                            // Check if I can move in this direction
-//                        } else if (rc.canMove(dirToMove)) {
-//                            // Move
-//                            rc.move(dirToMove);
-//                        }
+                        Direction dirToMove = directions[fate % 8];
+                        // Check the rubble in that direction
+                        if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
+                            // Too much rubble, so I should clear it
+                            rc.clearRubble(dirToMove);
+                            // Check if I can move in this direction
+                        } else if (rc.canMove(dirToMove)) {
+                            // Move
+                            rc.move(dirToMove);
+                        }
                     } else {
-//                        // Choose a random unit to build
-//                        RobotType typeToBuild = robotTypes[fate % 8];
-//                        // Check for sufficient parts
-//                        if (rc.hasBuildRequirements(typeToBuild)) {
-//                            // Choose a random direction to try to build in
-//                            Direction dirToBuild = directions[rand.nextInt(8)];
-//                            for (int i = 0; i < 8; i++) {
-//                                // If possible, build in this direction
-//                                if (rc.canBuild(dirToBuild, typeToBuild)) {
-//                                    rc.build(dirToBuild, typeToBuild);
-//                                    break;
-//                                } else {
-//                                    // Rotate the direction to try
-//                                    dirToBuild = dirToBuild.rotateLeft();
-//                                }
-//                            }
-//                        }
+                        // Choose a random unit to build
+                        RobotType typeToBuild = robotTypes[fate % 8];
+                        // Check for sufficient parts
+                        if (rc.hasBuildRequirements(typeToBuild)) {
+                            // Choose a random direction to try to build in
+                            Direction dirToBuild = directions[rand.nextInt(8)];
+                            for (int i = 0; i < 8; i++) {
+                                // If possible, build in this direction
+                                if (rc.canBuild(dirToBuild, typeToBuild)) {
+                                    rc.build(dirToBuild, typeToBuild);
+                                    break;
+                                } else {
+                                    // Rotate the direction to try
+                                    dirToBuild = dirToBuild.rotateLeft();
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -123,9 +125,18 @@ public class RobotPlayer {
     }
 
     private static void makeNonTurretMoves(RobotController rc, int myAttackRange, Team enemyTeam) {
+    	MapLocation goal;
     	try {
             // Any code here gets executed exactly once at the beginning of the game.
             myAttackRange = rc.getType().attackRadiusSquared;
+            MapLocation currentLocation = rc.getLocation();
+            
+            if(currentLocation.y > (GameConstants.MAP_MAX_HEIGHT/2) + 5) {
+            	goal = new MapLocation(GameConstants.MAP_MAX_WIDTH -5, 5);
+            } else {
+            	goal = new MapLocation(5, GameConstants.MAP_MAX_HEIGHT - 5);
+            }
+            System.out.println(goal);
         } catch (Exception e) {
             // Throwing an uncaught exception makes the robot die, so we need to catch exceptions.
             // Caught exceptions will result in a bytecode penalty.
@@ -135,13 +146,12 @@ public class RobotPlayer {
     	
     	int fate = 0;
     	// Choose a random direction to try to move in
-    	Direction dirToMove = directions[fate % 8];
-    	
 
         while (true) {
             // This is a loop to prevent the run() method from returning. Because of the Clock.yield()
             // at the end of it, the loop will iterate once per game round.
             try {
+            	Direction dirToMove = directions[fate % 8];
 
                 if (fate % 5 == 3) {
                     // Send a normal signal
@@ -168,29 +178,28 @@ public class RobotPlayer {
                         }
                     }
                 }
-                System.out.println("Not Moving");
-//                if (!shouldAttack) {
-//                	boolean didMove = false;
-//                    if (rc.isCoreReady()) {
-//                        if (fate < 600) {
-//                            // Check the rubble in that direction
-//                            if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
-//                                // Too much rubble, so I should clear it
-//                                rc.clearRubble(dirToMove);
-//                                didMove = true;
-//                                // Check if I can move in this direction
-//                            } else if (rc.canMove(dirToMove)) {
-//                                // Move
-//                                rc.move(dirToMove);
-//                                didMove = true;
-//                      
-//                            }
-//                        }
-//                    }
-//                    if (!didMove) {
-////                    	fate++;
-//                    }
-//                }
+                if (!shouldAttack) {
+                	boolean didMove = false;
+                    if (rc.isCoreReady()) {
+                        if (fate < 600) {
+                            // Check the rubble in that direction
+                            if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
+                                // Too much rubble, so I should clear it
+                                rc.clearRubble(dirToMove);
+                                didMove = true;
+                                // Check if I can move in this direction
+                            } else if (rc.canMove(dirToMove)) {
+                                // Move
+                                rc.move(dirToMove);
+                                didMove = true;
+                      
+                            }
+                        }
+                    }
+                    if (!didMove) {
+//                    	fate++;
+                    }
+                }
 
                 Clock.yield();
             } catch (Exception e) {
