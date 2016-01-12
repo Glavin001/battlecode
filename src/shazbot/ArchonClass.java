@@ -186,6 +186,11 @@ public class ArchonClass extends RobotPlayer{
             	}
             	
             	rc.setIndicatorString(2, "All bounds known?: " + " " + Boolean.toString(allBoundsSet) + Integer.toString(northBound) + "was nb and eb is: " + Integer.toString(eastBound));
+            	rc.setIndicatorString(2, "Number of known dens: " + Integer.toString(knownDens.size()));
+            	if(!knownDens.isEmpty()){
+            		int fate = rand.nextInt(knownDens.size());
+            		rc.setIndicatorString(2, "Den: " + Integer.toString(fate + 1) + " " + knownDens.get(fate).toString());
+            	}
             	
             	//Build turrets at the start, remove this later
                 if(rc.getRoundNum() < 120){

@@ -272,7 +272,7 @@ public class ScoutClass extends RobotPlayer {
  				 }
 				 rc.broadcastMessageSignal(messageConstants.DENX, Messaging.adjustBound(robot.location.x), distToNearestArchon);
 				 rc.broadcastMessageSignal(messageConstants.DENY, Messaging.adjustBound(robot.location.y), distToNearestArchon);
-				 //rc.setIndicatorString(2, "I transmitted denLocation this turn");
+				 rc.setIndicatorString(2, "I transmitted denLocation this turn");
 			 }
 		 }
 	}
