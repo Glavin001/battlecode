@@ -1,6 +1,7 @@
 package shazbot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import battlecode.common.Clock;
 import battlecode.common.Direction;
@@ -55,60 +56,70 @@ public class ScoutClass extends RobotPlayer {
         // General Scout exploration driver.
         // Don't let scout get stuck in concave areas, or near swarms of allies.
         public static void explore(Direction dirToMove) throws GameActionException {
-            if (rc.isCoreReady()) {
-                if (nearbyEnemies.length == 0) {
-                    // There are no known enemy threats
-                    if (rc.canMove(dirToMove)) {
-                        rc.move(dirToMove);
-                    } else if (rc.canMove(dirToMove.rotateLeft())) {
-                        rc.move(dirToMove.rotateLeft());
-                    } else if (rc.canMove(dirToMove.rotateRight())) {
-                        rc.move(dirToMove.rotateRight());
-                    }
-                } else {
-                    // There are enemies within sight!
-                    // Calculate least risking direction to move
-                    MapLocation currLoc = rc.getLocation();
-                    double leastRisk = Double.MAX_VALUE; // risks[0];
-                    Direction leastRiskyDirection = Direction.NONE;
-                    for (int i = 0; i < 4; i++) {
-                        // Check if can move in this direction
-                        Direction currDir = cardinals[i];
-                        if (rc.canMove(currDir)) {
-                            // Can move in this direction
-                            // Check attack risk value
-                            double risk = attackRisk(currLoc.add(currDir));
-                            // System.out.println("At location" +
-                            // currLoc.toString() + " risk in direction " +
-                            // currDir.toString() + " is: " +
-                            // Double.toString(risk));
-                            // Is this better?
-                            // Bias towards moving the same direction, dirToMove
-                            if (currDir.equals(dirToMove) && risk <= leastRisk) {
-                                // At least as good
-                                leastRisk = risk;
-                                leastRiskyDirection = dirToMove;
-                                if (risk == 0.0) {
-                                    // Can't get any better than this!
-                                    break;
-                                }
-                            } else
-                            //
-                            if (risk < leastRisk) {
-                                // Better
-                                leastRisk = risk;
-                                leastRiskyDirection = cardinals[i];
-                            }
-                        }
-                    }
-                    if (!leastRiskyDirection.equals(Direction.NONE)) {
-                        // rc.setIndicatorString(2, "Retreating towards: " +
-                        // leastRiskyDirection.toString());
-                        rc.move(leastRiskyDirection);
-                    }
-
+          if (rc.isCoreReady()) {
+            if (nearbyEnemies.length == 0) {
+              // There are no known enemy threats
+              if (rc.canMove(dirToMove)) {
+                rc.move(dirToMove);
+              } else if (rc.canMove(dirToMove.rotateLeft())) {
+                rc.move(dirToMove.rotateLeft());
+              } else if (rc.canMove(dirToMove.rotateRight())) {
+                rc.move(dirToMove.rotateRight());
+              }
+            } else {
+              // There are enemies within sight!
+              // Calculate least risking direction to move
+              MapLocation currLoc = rc.getLocation();
+              double leastRisk = Double.MAX_VALUE; // risks[0];
+              Direction leastRiskyDirection = Direction.NONE;
+              Direction[] allDirs = Direction.values();
+              MapLocation goalLoc = currLoc.add(dirToMove);
+              MapLocation leastRiskyLoc = goalLoc;
+              double[] risks = new double[allDirs.length];
+              for (int i = 0; i < allDirs.length; i++) {
+                // Check if can move in this direction
+                Direction currDir = allDirs[i];
+                if (rc.canMove(currDir)) {
+                  // Can move in this direction
+                  // Check attack risk value
+                  MapLocation nextLoc = currLoc.add(currDir);
+                  double risk = attackRisk(nextLoc);
+                  risks[i] = risk;
+                  // System.out.println("At location" +
+                  // currLoc.toString() + " risk in direction " +
+                  // currDir.toString() + " is: " +
+                  // Double.toString(risk));
+                  // Is this better?
+                  // Bias towards moving the same direction, dirToMove
+                  if (currDir.equals(dirToMove) && risk <= leastRisk) {
+                    // At least as good
+                    leastRisk = risk;
+                    leastRiskyDirection = dirToMove;
+                    leastRiskyLoc = nextLoc;
+                  } else if (risk < leastRisk) {
+                    // Better
+                    leastRisk = risk;
+                    leastRiskyDirection = allDirs[i];
+                    leastRiskyLoc = nextLoc;
+                  } else if (risk == leastRisk && (goalLoc.distanceSquaredTo(nextLoc) < goalLoc
+                      .distanceSquaredTo(leastRiskyLoc))) {
+                    // Equally as good but closer to the original
+                    // dirToMove direction
+                    leastRisk = risk;
+                    leastRiskyDirection = allDirs[i];
+                    leastRiskyLoc = nextLoc;
+                  }
                 }
+              }
+              if (!leastRiskyDirection.equals(Direction.NONE)) {
+                // rc.setIndicatorString(2, "Retreating towards: " +
+                // leastRiskyDirection.toString());
+                rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
+                rc.move(leastRiskyDirection);
+              }
+
             }
+          }
         }
 
         /*
@@ -121,29 +132,31 @@ public class ScoutClass extends RobotPlayer {
          *
          */
         public static double attackRisk(MapLocation loc) {
-            if (nearbyEnemies.length > 0) {
-                double totalRisk = 0.0;
-                for (RobotInfo r : nearbyEnemies) {
-                    MapLocation enemyLoc = r.location;
-                    RobotType enemyType = r.type;
-                    int distAway = loc.distanceSquaredTo(enemyLoc);
-                    if (distAway <= enemyType.attackRadiusSquared) {
-                        // If enemy has 0 attack power then risk = 0
-                        // If Core delay is 0 then risk = numerator, and will be
-                        // divided by each turn/core delay
-                        double risk = ((enemyType.attackRadiusSquared - distAway) * r.attackPower)
-                                / (r.coreDelay + 1.0);
-                        totalRisk += risk;
-                    }
-                }
-                // rc.setIndicatorString(2, "Risk this turn is: " +
-                // Double.toString(totalRisk));
-                // System.out.println("The total risk for possible location " +
-                // loc.toString() + " was: " + Double.toString(totalRisk));
-                return totalRisk;
-            } else {
-                return 0.0;
+          if (nearbyEnemies.length > 0) {
+            double totalRisk = 0.0;
+            for (RobotInfo r : nearbyEnemies) {
+              MapLocation enemyLoc = r.location;
+              RobotType enemyType = r.type;
+              int distAway = loc.distanceSquaredTo(enemyLoc);
+              int offsetBlocks = 2;
+              int offsetSquared = offsetBlocks * offsetBlocks;
+              if ((distAway + offsetSquared) <= enemyType.attackRadiusSquared) {
+                // If enemy has 0 attack power then risk = 0
+                // If Core delay is 0 then risk = numerator, and will be
+                // divided by each turn/core delay
+                double risk = ((enemyType.attackRadiusSquared - (distAway + offsetSquared)) * r.attackPower)
+                    / (r.coreDelay + 1.0);
+                totalRisk += risk;
+              }
             }
+            // rc.setIndicatorString(2, "Risk this turn is: " +
+            // Double.toString(totalRisk));
+            System.out.println("The total risk for possible location " + loc.toString() + " was: "
+                + Double.toString(totalRisk));
+            return totalRisk;
+          } else {
+            return 0.0;
+          }
         }
 
         // Tells us if a point in a given cardinal direction at our maximum
@@ -206,7 +219,7 @@ public class ScoutClass extends RobotPlayer {
             } else if (!haveBroadCastedMapBounds) {
                 broadcastMapBounds();
             } else {
-                Movement.randomMove();
+                explore(Movement.randomDirection());
             }
         }
     }

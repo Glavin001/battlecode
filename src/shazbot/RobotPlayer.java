@@ -69,6 +69,11 @@ public class RobotPlayer {
 
     static class Movement {
 
+        public static Direction randomDirection() {
+          int fate = rand.nextInt(8);
+          return directions[fate % 8];
+        }
+
         public static void randomMove() throws GameActionException {
             int fate = rand.nextInt(8);
             if (rc.isCoreReady()) {
