@@ -20,7 +20,7 @@ public class ScoutClass extends RobotPlayer {
 
 	// Get the maximum number of tiles in one direction away in sensor radius
 	static int myDv = (int) Math.floor(Math.sqrt(myRobotType.sensorRadiusSquared));
-	static Direction[] cardinals = { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST };	
+	static Direction[] cardinals = { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST };
 	static boolean[] haveOffsets = { false, false, false, false };
 	static Direction currentExploreDirection = Direction.NORTH;
 	static int numExploredDirections = 0;
@@ -82,7 +82,10 @@ public class ScoutClass extends RobotPlayer {
 							MapLocation nextLoc = currLoc.add(currDir);
 							double risk = attackRisk(nextLoc);
 							risks[i] = risk;
-//							System.out.println("At location" + currLoc.toString() + " risk in direction " + currDir.toString() + " is: " + Double.toString(risk));
+							// System.out.println("At location" +
+							// currLoc.toString() + " risk in direction " +
+							// currDir.toString() + " is: " +
+							// Double.toString(risk));
 							// Is this better?
 							// Bias towards moving the same direction, dirToMove
 							if (currDir.equals(dirToMove) && risk <= leastRisk) {
@@ -95,8 +98,10 @@ public class ScoutClass extends RobotPlayer {
 								leastRisk = risk;
 								leastRiskyDirection = allDirs[i];
 								leastRiskyLoc = nextLoc;
-							} else if (risk == leastRisk && (goalLoc.distanceSquaredTo(nextLoc) < goalLoc.distanceSquaredTo(leastRiskyLoc)) ) {
-								// Equally as good but closer to the original dirToMove direction
+							} else if (risk == leastRisk && (goalLoc.distanceSquaredTo(nextLoc) < goalLoc
+									.distanceSquaredTo(leastRiskyLoc))) {
+								// Equally as good but closer to the original
+								// dirToMove direction
 								leastRisk = risk;
 								leastRiskyDirection = allDirs[i];
 								leastRiskyLoc = nextLoc;
@@ -104,7 +109,8 @@ public class ScoutClass extends RobotPlayer {
 						}
 					}
 					if (!leastRiskyDirection.equals(Direction.NONE)) {
-//						rc.setIndicatorString(2, "Retreating towards: " + leastRiskyDirection.toString());
+						// rc.setIndicatorString(2, "Retreating towards: " +
+						// leastRiskyDirection.toString());
 						rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
 						rc.move(leastRiskyDirection);
 					}
@@ -130,16 +136,20 @@ public class ScoutClass extends RobotPlayer {
 					RobotType enemyType = r.type;
 					int distAway = loc.distanceSquaredTo(enemyLoc);
 					int offsetBlocks = 2;
-					int offsetSquared = offsetBlocks*offsetBlocks;
-					if ((distAway+offsetSquared) <= enemyType.attackRadiusSquared) {
+					int offsetSquared = offsetBlocks * offsetBlocks;
+					if ((distAway + offsetSquared) <= enemyType.attackRadiusSquared) {
 						// If enemy has 0 attack power then risk = 0
-						// If Core delay is 0 then risk = numerator, and will be divided by each turn/core delay
-						double risk = ((enemyType.attackRadiusSquared - (distAway+offsetSquared)) * r.attackPower) / (r.coreDelay + 1.0);					
+						// If Core delay is 0 then risk = numerator, and will be
+						// divided by each turn/core delay
+						double risk = ((enemyType.attackRadiusSquared - (distAway + offsetSquared)) * r.attackPower)
+								/ (r.coreDelay + 1.0);
 						totalRisk += risk;
 					}
 				}
-				// rc.setIndicatorString(2, "Risk this turn is: " + Double.toString(totalRisk));
-				System.out.println("The total risk for possible location " + loc.toString() + " was: " + Double.toString(totalRisk));
+				// rc.setIndicatorString(2, "Risk this turn is: " +
+				// Double.toString(totalRisk));
+				System.out.println("The total risk for possible location " + loc.toString() + " was: "
+						+ Double.toString(totalRisk));
 				return totalRisk;
 			} else {
 				return 0.0;
@@ -206,7 +216,7 @@ public class ScoutClass extends RobotPlayer {
 			} else if (!haveBroadCastedMapBounds) {
 				broadcastMapBounds();
 			} else {
-//				Movement.randomMove();
+				// Movement.randomMove();
 				explore(Movement.randomDirection());
 			}
 		}
