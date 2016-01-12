@@ -74,6 +74,7 @@ public class ScoutClass extends RobotPlayer {
 							// Can move in this direction
 							// Check attack risk value
 							double risk = attackRisk(currLoc.add(currDir));
+//							System.out.println("At location" + currLoc.toString() + " risk in direction " + currDir.toString() + " is: " + Double.toString(risk));
 							// Is this better?
 							// Bias towards moving the same direction, dirToMove
 							if (currDir.equals(dirToMove) && risk <= leastRisk) {
@@ -94,6 +95,7 @@ public class ScoutClass extends RobotPlayer {
 						}
 					}
 					if (!leastRiskyDirection.equals(Direction.NONE)) {
+//						rc.setIndicatorString(2, "Retreating towards: " + leastRiskyDirection.toString());
 						rc.move(leastRiskyDirection);
 					}
 
@@ -116,14 +118,16 @@ public class ScoutClass extends RobotPlayer {
 				for (RobotInfo r : nearbyEnemies) {
 					MapLocation enemyLoc = r.location;
 					RobotType enemyType = r.type;
-					int distAway = rc.getLocation().distanceSquaredTo(enemyLoc);
+					int distAway = loc.distanceSquaredTo(enemyLoc);
 					if (distAway <= enemyType.attackRadiusSquared) {
 						// If enemy has 0 attack power then risk = 0
 						// If Core delay is 0 then risk = numerator, and will be divided by each turn/core delay
-						double risk = ((enemyType.attackRadiusSquared - distAway) * r.attackPower) / (r.coreDelay + 1.0);
+						double risk = ((enemyType.attackRadiusSquared - distAway) * r.attackPower) / (r.coreDelay + 1.0);					
 						totalRisk += risk;
 					}
 				}
+//				rc.setIndicatorString(2, "Risk this turn is: " + Double.toString(totalRisk));
+//				System.out.println("The total risk for possible location " + loc.toString() + " was: " + Double.toString(totalRisk));
 				return totalRisk;
 			} else {
 				return 0.0;
