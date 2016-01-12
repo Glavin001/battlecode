@@ -65,7 +65,7 @@ public class ScoutClass extends RobotPlayer {
 					// There are enemies within sight!
 					// Calculate least risking direction to move
 					MapLocation currLoc = rc.getLocation();
-					int leastRisk = Integer.MAX_VALUE; // risks[0];
+					double leastRisk = Double.MAX_VALUE; // risks[0];
 					Direction leastRiskyDirection = Direction.NONE;
 					for (int i = 0; i < 4; i++) {
 						// Check if can move in this direction
@@ -73,14 +73,14 @@ public class ScoutClass extends RobotPlayer {
 						if (rc.canMove(currDir)) {
 							// Can move in this direction
 							// Check attack risk value
-							int risk = attackRisk(currLoc.add(currDir));
+							double risk = attackRisk(currLoc.add(currDir));
 							// Is this better?
 							// Bias towards moving the same direction, dirToMove
 							if (currDir.equals(dirToMove) && risk <= leastRisk) {
 								// At least as good
 								leastRisk = risk;
 								leastRiskyDirection = dirToMove;
-								if (risk == 0) {
+								if (risk == 0.0) {
 									// Can't get any better than this!
 									break;
 								}
@@ -110,20 +110,23 @@ public class ScoutClass extends RobotPlayer {
 		 * (no risk of attack).
 		 * 
 		 */
-		public static int attackRisk(MapLocation loc) {
+		public static double attackRisk(MapLocation loc) {
 			if (nearbyEnemies.length > 0) {
-				int risk = 0;
+				double totalRisk = 0.0;
 				for (RobotInfo r : nearbyEnemies) {
 					MapLocation enemyLoc = r.location;
 					RobotType enemyType = r.type;
 					int distAway = rc.getLocation().distanceSquaredTo(enemyLoc);
 					if (distAway <= enemyType.attackRadiusSquared) {
-						risk++;
+						// If enemy has 0 attack power then risk = 0
+						// If Core delay is 0 then risk = numerator, and will be divided by each turn/core delay
+						double risk = ((enemyType.attackRadiusSquared - distAway) * r.attackPower) / (r.coreDelay + 1.0);
+						totalRisk += risk;
 					}
 				}
-				return risk;
+				return totalRisk;
 			} else {
-				return 0;
+				return 0.0;
 			}
 		}
 
