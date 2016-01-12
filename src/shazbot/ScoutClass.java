@@ -140,12 +140,16 @@ public class ScoutClass extends RobotPlayer {
               int distAway = loc.distanceSquaredTo(enemyLoc);
               int offsetBlocks = 2;
               int offsetSquared = offsetBlocks * offsetBlocks;
-              if ((distAway + offsetSquared) <= enemyType.attackRadiusSquared) {
+              int safeDist = (enemyType.attackRadiusSquared+offsetSquared);
+              if (enemyType.equals(RobotType.TURRET)) {
+                  safeDist = RobotType.TURRET.sensorRadiusSquared + offsetSquared;
+              }
+              if (distAway <= safeDist) {
                 // If enemy has 0 attack power then risk = 0
                 // If Core delay is 0 then risk = numerator, and will be
                 // divided by each turn/core delay
-                double risk = ((enemyType.attackRadiusSquared - (distAway + offsetSquared)) * r.attackPower)
-                    / (r.coreDelay + 1.0);
+                double risk = ((safeDist - distAway) * r.attackPower)
+                    / (r.weaponDelay + 1.0);
                 totalRisk += risk;
               }
             }
