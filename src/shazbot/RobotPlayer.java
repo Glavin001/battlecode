@@ -31,61 +31,101 @@ public class RobotPlayer {
     static RobotType myRobotType;
     static MapLocation nearestArchon;
     
+    static class Movement{
+    	
+    	 public static void randomMove() throws GameActionException{
+    	    	int fate = rand.nextInt(8);
+    	    	if(rc.isCoreReady()){
+    	    		Direction dirToMove;
+    	    		for(int i  = 0; i < 8; i++){
+    	    			dirToMove = directions[(fate + i) % 8];
+    	                if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+    	                    // Too much rubble, so I should clear it
+    	                    rc.clearRubble(dirToMove);
+    	                    break;
+    	                    // Check if I can move in this direction
+    	                } else if (rc.canMove(dirToMove)) {
+    	                    // Move
+    	                    rc.move(dirToMove);
+    	                    break;
+    	                }
+    	    		}
+    	    	}else{
+    	    		//rc.setIndicatorString(0, "I could not move this turn");
+    	    	}
+    	    }
+    	    
+    	    
+    	    public static void retreatToArchon() throws GameActionException{
+    	    	pathToLocation(nearestArchon);
+    	    }   	
+    	    public static void moveToClosestEnemy() throws GameActionException{
+    	    	if(nearbyEnemies.length > 0){
+    	    		pathToLocation(nearbyEnemies[0].location);
+    	    	}else{
+    	    		randomMove();
+    	    	}
+    	    }
+    	    
+    	    public static void moveToClosestTraitor() throws GameActionException{
+    	    	if(nearbyTraitors.length > 0){
+    	    		pathToLocation(nearbyTraitors[0].location);
+    	    	}else{
+    	    		randomMove();
+    	    	}    	
+    	    }
+    	    
+    	    public static void pathToLocation(MapLocation loc) throws GameActionException{
+    	    	if(rc.isCoreReady()){
+    	    		MapLocation myLoc = rc.getLocation();
+    	    		Direction dirToMove = myLoc.directionTo(loc);
+    	    		rc.setIndicatorString(0, "Direction to path is: " + dirToMove.toString());
+    	            if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+    	                // Too much rubble, so I should clear it
+    	                rc.clearRubble(dirToMove);
+    	                // Check if I can move in this direction
+    	            } else if (rc.canMove(dirToMove)) {
+    	                rc.move(dirToMove);
+    	            } else if (rc.canMove(dirToMove.rotateLeft())){
+    	            	rc.move(dirToMove.rotateLeft());
+    	            } else if (rc.canMove(dirToMove.rotateRight())){
+    	            	rc.move(dirToMove.rotateRight());
+    	            }
+    	    	}
+    	    }
+    }
+
     
-    public static void randomMove() throws GameActionException{
-    	int fate = rand.nextInt(8);
-    	if(rc.isCoreReady()){
-    		Direction dirToMove;
-    		for(int i  = 0; i < 8; i++){
-    			dirToMove = directions[(fate + i) % 8];
-                if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
-                    // Too much rubble, so I should clear it
-                    rc.clearRubble(dirToMove);
-                    break;
-                    // Check if I can move in this direction
-                } else if (rc.canMove(dirToMove)) {
-                    // Move
-                    rc.move(dirToMove);
-                    break;
-                }
+    static class Offensive{
+    	public static void attack() throws GameActionException{
+        	attack(null);
+        }
+        
+        public static void attack(Team team) throws GameActionException{
+    		if(rc.isCoreReady() && rc.isWeaponReady()){
+    			//If unspecified, attack first enemy in list
+    			if(team == null){
+    				//Prioritize attacking enemy units
+    				if(attackableTraitors.length > 0){
+    					rc.attackLocation(attackableTraitors[0].location);
+    				}else if(attackableZombies.length > 0){
+    					rc.attackLocation(attackableZombies[0].location);
+    				}
+        		//Attack first zombie in list
+    			}else if(team == Team.ZOMBIE){
+    				if(attackableZombies.length > 0){
+    					rc.attackLocation(attackableZombies[0].location);
+    				}
+    			//Attack first enemy on other team
+    			}else if(team == enemyTeam){
+    				if(attackableTraitors.length > 0){
+    					rc.attackLocation(attackableTraitors[0].location);
+    				}				
+    			}
     		}
-    	}else{
-    		//rc.setIndicatorString(0, "I could not move this turn");
-    	}
+        }    	
     }
     
-    
-    public static void retreatToArchon() throws GameActionException{
-    	pathToLocation(nearestArchon);
-    }
-    
-    public static void attack() throws GameActionException{
-    	attack(null);
-    }
-    
-    public static void attack(Team team) throws GameActionException{
-		if(rc.isCoreReady() && rc.isWeaponReady()){
-			//If unspecified, attack first enemy in list
-			if(team == null){
-				//Prioritize attacking enemy units
-				if(attackableTraitors.length > 0){
-					rc.attackLocation(attackableTraitors[0].location);
-				}else if(attackableZombies.length > 0){
-					rc.attackLocation(attackableZombies[0].location);
-				}
-    		//Attack first zombie in list
-			}else if(team == Team.ZOMBIE){
-				if(attackableZombies.length > 0){
-					rc.attackLocation(attackableZombies[0].location);
-				}
-			//Attack first enemy on other team
-			}else if(team == enemyTeam){
-				if(attackableTraitors.length > 0){
-					rc.attackLocation(attackableTraitors[0].location);
-				}				
-			}
-		}
-    }
     
     public static void updateNearbyEnemies(){
     	nearbyEnemies = rc.senseHostileRobots(rc.getLocation(), myRobotType.sensorRadiusSquared);  	
@@ -107,41 +147,6 @@ public class RobotPlayer {
             	 nearestArchon = loc;
         	 }
          }
-    }
-    
-    public static void moveToClosestEnemy() throws GameActionException{
-    	if(nearbyEnemies.length > 0){
-    		pathToLocation(nearbyEnemies[0].location);
-    	}else{
-    		randomMove();
-    	}
-    }
-    
-    public static void moveToClosestTraitor() throws GameActionException{
-    	if(nearbyTraitors.length > 0){
-    		pathToLocation(nearbyTraitors[0].location);
-    	}else{
-    		randomMove();
-    	}    	
-    }
-    
-    public static void pathToLocation(MapLocation loc) throws GameActionException{
-    	if(rc.isCoreReady()){
-    		MapLocation myLoc = rc.getLocation();
-    		Direction dirToMove = myLoc.directionTo(loc);
-    		rc.setIndicatorString(0, "Direction to path is: " + dirToMove.toString());
-            if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
-                // Too much rubble, so I should clear it
-                rc.clearRubble(dirToMove);
-                // Check if I can move in this direction
-            } else if (rc.canMove(dirToMove)) {
-                rc.move(dirToMove);
-            } else if (rc.canMove(dirToMove.rotateLeft())){
-            	rc.move(dirToMove.rotateLeft());
-            } else if (rc.canMove(dirToMove.rotateRight())){
-            	rc.move(dirToMove.rotateRight());
-            }
-    	}
     }
     
     public static void emptyIndicatorStrings(){

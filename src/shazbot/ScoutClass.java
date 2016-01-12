@@ -16,6 +16,7 @@ public class ScoutClass extends RobotPlayer{
 	static int[] offsets = {0,0,0,0};
 	static Direction currentExploreDirection = Direction.NORTH;
 	static int numExploredDirections = 0;
+	static boolean haveBroadCastedMapBounds = false;
 	
 	//Enclosure for all of the exploration functions
 	static class Exploration{
@@ -88,7 +89,9 @@ public class ScoutClass extends RobotPlayer{
 	    				explore(currentExploreDirection);
 	    			}
 	    		}           		
-	    	}		
+	    	}else if(!haveBroadCastedMapBounds){
+	    		
+	    	}
 		}		
 	}
 	
