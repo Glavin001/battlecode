@@ -1,5 +1,7 @@
 package shazbot;
 
+import java.util.ArrayList;
+
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -23,6 +25,8 @@ public class ScoutClass extends RobotPlayer {
 	static Direction currentExploreDirection = Direction.NORTH;
 	static int numExploredDirections = 0;
 	static boolean haveBroadCastedMapBounds = false;
+	static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();;
+	static int numKnownDens = 0;
 
 	// Enclosure for all of the exploration functions
 	static class Exploration {
@@ -244,12 +248,33 @@ public class ScoutClass extends RobotPlayer {
 
 	}
 
-	public static void reportDens() {
-		// for(RobotInfo robot : nearbyEnemies){
-		// if(robot.type == RobotType.ZOMBIEDEN &&){
-		// rc.broadcastMessageSignal(messageConstants.DENX, , radiusSquared);
-		// }
-		// }
+	public static void reportDens() throws GameActionException {
+		 int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
+		 
+		 for(RobotInfo robot : nearbyEnemies){
+			 //TODO:
+			 //Also check if the den exists in out list of knownDens
+			 if(robot.type == RobotType.ZOMBIEDEN){
+				 //Check known dens so we don't add duplicates
+				 boolean wasDuplicate = false;
+ 				 for(MapLocation den : knownDens){
+ 				 	if((den.x == robot.location.x && den.y == robot.location.y)){
+ 				 		wasDuplicate = true;
+ 				 		continue;
+ 				 	}
+ 				 }
+ 				 //If it was a duplicate, go to next robot and don't broadcast
+ 				 if(wasDuplicate){
+ 					 continue;
+ 				 }else{
+ 					 //Otherwise we are dealing with a new den.
+ 					 knownDens.add(new MapLocation(robot.location.x, robot.location.y));
+ 				 }
+				 rc.broadcastMessageSignal(messageConstants.DENX, Messaging.adjustBound(robot.location.x), distToNearestArchon);
+				 rc.broadcastMessageSignal(messageConstants.DENY, Messaging.adjustBound(robot.location.y), distToNearestArchon);
+				 //rc.setIndicatorString(2, "I transmitted denLocation this turn");
+			 }
+		 }
 	}
 
 	// Given a direction, try to move that way, but avoid taking damage or going
@@ -266,6 +291,10 @@ public class ScoutClass extends RobotPlayer {
 				Debug.emptyIndicatorStrings();
 				Sensing.updateNearbyEnemies();
 				ScoutMessaging.handleMessageQueue();
+				// If we have found every bound
+				if (numExploredDirections == 4 || allBoundsSet == true){
+					reportDens();
+				}
 
 				// Wander out into the wilderness
 				// find anything of interest

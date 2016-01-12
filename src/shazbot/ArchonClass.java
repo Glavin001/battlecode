@@ -9,10 +9,20 @@ import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import shazbot.RobotPlayer.Messaging;
 import shazbot.RobotPlayer.messageConstants;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ArchonClass extends RobotPlayer{
 	
 	static int defaultBroadcastRange = 2000;
+	//Are we waiting on a scout to complete a message?
+	static Map<Integer, Boolean> waitingMessageID;
+	//What was the last message the scout sent?
+	static Map<Integer, Integer> lastTransmissionID;
+	
+	static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();
+
 
 	static class ArchonMessaging{
 		
@@ -25,8 +35,9 @@ public class ArchonClass extends RobotPlayer{
 				   	 MapLocation loc = signal.getLocation();   
 				   	 int msg1 = signal.getMessage()[0];
 				   	 int msg2 = signal.getMessage()[1];
+				   	 int id = signal.getID();
 				   	 switch(msg1){
-				   	 //Handle Scout messages that about map bounds
+				   	 	//Handle Scout messages about map bounds
 				   	 	case messageConstants.SMBN:
 				   	 		//Propagate the message to nearby scouts and archons
 				   	 		rc.broadcastMessageSignal(messageConstants.AMBN, msg2, defaultBroadcastRange);
@@ -50,11 +61,52 @@ public class ArchonClass extends RobotPlayer{
 				   	 		setMapBound(Direction.WEST, msg2);
 				   	 		break;
 				   	 		
+				   	 	//Handle reporting of zombie dens
+				   	 	case messageConstants.DENX:
+				   	 		storeDenLocation(msg2, id, messageConstants.DENX);
+				   	 		break;
+				   	 	case messageConstants.DENY:
+				   	 		msg2 = Messaging.adjustBound(msg2);	
+				   	 		storeDenLocation(msg2, id, messageConstants.DENY);
+				   	 		break;
+				   	 		
 				   	 }
 
 				}
             }			
 			
+		}
+		
+		public static void storeDenLocation(int packedCoordinate, int id, int denXOrDenY){
+   	 		//Unpackage map coordinate.
+   	 		int coordinate = Messaging.adjustBound(packedCoordinate);
+   	 		//If we have an entry for this scout
+   	 		if(waitingMessageID.containsKey(id)){
+   	 			//If we had DENY and just got DENX, complete
+   	 			if(waitingMessageID.get(id)){
+   	 				int oldCoordinate = lastTransmissionID.get(id);
+   	 				//We are no longer waiting on this scout.
+   	 				waitingMessageID.put(id, false);
+   	 				//Check if the den already exists in our list, return if it does
+   	 				for(MapLocation den : knownDens){
+   	 					if((den.x == coordinate && den.y == oldCoordinate) || (den.y == coordinate && den.x == oldCoordinate)){
+   	 						return;
+   	 					}
+   	 				}
+   	 				//Create a new map location at the reported spot.
+   	 				MapLocation denLoc;
+   	 				if(denXOrDenY == messageConstants.DENX){
+   	 					denLoc = new MapLocation(coordinate, oldCoordinate);
+   	 				}else{
+   	 					denLoc = new MapLocation(oldCoordinate, coordinate);
+   	 				}
+   	 				knownDens.add(denLoc);
+   	 			}
+   	 		}else{
+   	 			//Otherwise put in a new entry
+   	 			waitingMessageID.put(id, true);
+   	 			lastTransmissionID.put(id, coordinate);
+   	 		}			
 		}
 		
 		public static void broadcastMapBounds() throws GameActionException{
@@ -110,12 +162,18 @@ public class ArchonClass extends RobotPlayer{
 		}
 	}
 	
+	public static void initialize(){
+		waitingMessageID = new HashMap<Integer, Boolean>();
+		lastTransmissionID = new HashMap<Integer, Integer>();
+	}
+	
 	
 	public static void run(){	
 		
 		RobotType[] unitsToBuild = {RobotType.GUARD, RobotType.SCOUT};
 		int nextUnitToBuild = rand.nextInt(unitsToBuild.length);
 		boolean canChooseNextUnit = false;
+		initialize();
 		
         while (true) {
             try {

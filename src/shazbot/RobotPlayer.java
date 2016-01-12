@@ -25,7 +25,6 @@ public class RobotPlayer {
     static RobotInfo[] veryCloseAllies;
     static RobotInfo[] attackableZombies;
     static RobotInfo[] attackableTraitors;
-    static MapLocation[] knownDens;
     static Random rand;
     static int myAttackRange;
     static Team myTeam;
@@ -44,6 +43,7 @@ public class RobotPlayer {
     static boolean sbs = false;
     static boolean wbs = false;
     static boolean allBoundsSet = false;
+    static int maxID = 32000;
     
     //Message types
     static class messageConstants{
