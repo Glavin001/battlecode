@@ -56,6 +56,13 @@ public class ArchonClass extends RobotPlayer{
             }			
 			
 		}
+		
+		public static void broadcastMapBounds() throws GameActionException{
+			rc.broadcastMessageSignal(messageConstants.AMBN, Messaging.adjustBound(northBound), defaultBroadcastRange);
+			rc.broadcastMessageSignal(messageConstants.AMBE, Messaging.adjustBound(eastBound), defaultBroadcastRange);
+			rc.broadcastMessageSignal(messageConstants.AMBS, Messaging.adjustBound(southBound), defaultBroadcastRange);
+			rc.broadcastMessageSignal(messageConstants.AMBW, Messaging.adjustBound(westBound), defaultBroadcastRange);
+		}
 	}
 	
 
@@ -80,6 +87,10 @@ public class ArchonClass extends RobotPlayer{
 	                        // Broadcast to nearby units our location, so they save it.
 	                        // Just a note that broadcasting increases core delay, try to minimize it!
 	                        rc.broadcastMessageSignal(messageConstants.NEAL,(int)'A', broadcastDistance);
+	                        //If it is a scout, tell it the new bounds that we already know
+	                        if(typeToBuild == RobotType.SCOUT && allBoundsSet){
+	                        	ArchonMessaging.broadcastMapBounds();
+	                        }
 	                        return true;
 	                    } else {
 	                        // Rotate the direction to try
@@ -93,6 +104,7 @@ public class ArchonClass extends RobotPlayer{
 	}
 	
 	public static void defendMe(){
+		//If we somehow have many nearby enemies and no allies, have everyone retreat.
 		if(nearbyEnemies.length > 0){
 			//HELP ME
 		}

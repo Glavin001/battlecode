@@ -25,6 +25,7 @@ public class RobotPlayer {
     static RobotInfo[] veryCloseAllies;
     static RobotInfo[] attackableZombies;
     static RobotInfo[] attackableTraitors;
+    static MapLocation[] knownDens;
     static Random rand;
     static int myAttackRange;
     static Team myTeam;
@@ -60,6 +61,9 @@ public class RobotPlayer {
     	public final static int AMBE = 44321;
     	public final static int AMBS = 34321;
     	public final static int AMBW = 24321;
+    	
+    	public final static int DENX = 666660;
+    	public final static int DENY = 666661;
     	
     }
     
@@ -105,6 +109,12 @@ public class RobotPlayer {
     	    	}else{
     	    		randomMove();
     	    	}    	
+    	    }
+    	    
+    	    //Make newly created units stay within some default range of the nearest archon.
+    	    //Essentially, don't allow freedom of movement unless if takes us far away from 'mother'
+    	    public static void swarmNearestArchon(){
+    	    	
     	    }
     	    
     	    public static void pathToLocation(MapLocation loc) throws GameActionException{
@@ -155,6 +165,13 @@ public class RobotPlayer {
     			}
     		}
         }    	
+        
+        //For soldiers and guards and such. An algorithm that moves soldiers
+        // and the like as a cohesive unit towards hostile territory.
+        // Don't want units to move out alone with this.
+        public static void attackMove(MapLocation loc){
+        	
+        }
     }
     
     static class Messaging{

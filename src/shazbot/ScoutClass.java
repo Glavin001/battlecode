@@ -5,6 +5,8 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
 import shazbot.RobotPlayer.Debug;
@@ -155,6 +157,21 @@ public class ScoutClass extends RobotPlayer{
 		}
 	
 	}
+
+	public static void reportDens(){
+//		for(RobotInfo robot : nearbyEnemies){
+//			if(robot.type == RobotType.ZOMBIEDEN &&){
+//				rc.broadcastMessageSignal(messageConstants.DENX, , radiusSquared);
+//			}
+//		}
+	}
+	
+    //Given a direction, try to move that way, but avoid taking damage or going far into enemy LOF.
+    //General Scout exploration driver.
+	//Don't let scout get stuck in concave areas, or near swarms of allies.
+    public static void pathDirectionAvoidEnemies(Direction dir){
+    	
+    }
 	
 	public static void run(){
 	    while (true) {
