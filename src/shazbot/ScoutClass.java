@@ -5,7 +5,14 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
+import battlecode.common.Signal;
 import battlecode.common.Team;
+import shazbot.RobotPlayer.Debug;
+import shazbot.RobotPlayer.Messaging;
+import shazbot.RobotPlayer.Sensing;
+import shazbot.RobotPlayer.messageConstants;
 
 public class ScoutClass extends RobotPlayer{
 	
@@ -13,12 +20,13 @@ public class ScoutClass extends RobotPlayer{
 	static int myDv = (int)Math.floor(Math.sqrt(myRobotType.sensorRadiusSquared));
 	static Direction[] cardinals = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 	static boolean[] haveOffsets = {false, false, false, false};
-	static int[] offsets = {0,0,0,0};
 	static Direction currentExploreDirection = Direction.NORTH;
 	static int numExploredDirections = 0;
+	static boolean haveBroadCastedMapBounds = false;
 	
 	//Enclosure for all of the exploration functions
 	static class Exploration{
+
 		//Dumb help function, please kill me and replace with a map
 		public static int returnCardinalIndex(Direction dir) throws GameActionException{
 			//Switch because no associative arrays, could map this instead, but that might cost more
@@ -65,39 +73,112 @@ public class ScoutClass extends RobotPlayer{
 			for(int i = myDv; i > 0; i--){
 				MapLocation temp = rc.getLocation().add(dir, i);
 				if(rc.onTheMap(temp)){
-					offsets[returnCardinalIndex(dir)] = (dir == Direction.NORTH || dir == Direction.SOUTH)? temp.y : temp.x;
+					int bound = (dir == Direction.NORTH || dir == Direction.SOUTH)? temp.y : temp.x;
+					setMapBound(dir, bound);
 					haveOffsets[returnCardinalIndex(dir)] = true;
-					rc.setIndicatorString(0, dir.toString() + " bound value is : " + Integer.toString(offsets[returnCardinalIndex(dir)]));
+					//rc.setIndicatorString(0, dir.toString() + " bound value is : " + Integer.toString(offsets[returnCardinalIndex(dir)]));
 					numExploredDirections++;
 					break;
 				}
 			}		
 		}
 		
+		public static void broadcastMapBounds() throws GameActionException{
+			int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
+			rc.broadcastMessageSignal(messageConstants.SMBN, Messaging.adjustBound(northBound), distToNearestArchon);
+			rc.broadcastMessageSignal(messageConstants.SMBE, Messaging.adjustBound(eastBound), distToNearestArchon);
+			rc.broadcastMessageSignal(messageConstants.SMBS, Messaging.adjustBound(southBound), distToNearestArchon);
+			rc.broadcastMessageSignal(messageConstants.SMBW, Messaging.adjustBound(westBound), distToNearestArchon);
+			haveBroadCastedMapBounds = true;
+		}
+		
 		public static void tryExplore() throws GameActionException{
 	    	//If we have not found every bound
-	    	if(numExploredDirections != 4){
+	    	if(numExploredDirections != 4 && allBoundsSet != true){
 	    		//If we don't already have a bound for this direction
 	    		if(!haveOffsets[returnCardinalIndex(currentExploreDirection)]){
 	    			//If we go off the map in sight range for the given direction, we can get the offset
 	    			if(!checkCardinalOnMap(currentExploreDirection)){
 	    				findExactOffset(currentExploreDirection);
-	    				currentExploreDirection = cardinals[numExploredDirections];
+	    				currentExploreDirection = cardinals[numExploredDirections % 4];
 	    			//Otherwise go explore in that direction.
 	    			}else{
 	    				explore(currentExploreDirection);
 	    			}
 	    		}           		
-	    	}		
+	    	}else if(!haveBroadCastedMapBounds){
+	    		broadcastMapBounds();
+	    	}else{
+	    		Movement.randomMove();
+	    	}
 		}		
 	}
+	
+	static class ScoutMessaging{
+		
+		public static void handleMessageQueue() throws GameActionException{
+			//SUPER
+			Messaging.handleMessageQueue();
+			//currentSignals[] is now set for this round. Overflow may cause problems.
+            if (currentSignals.length > 0) {
+				for(Signal signal : currentSignals){
+				   	 MapLocation loc = signal.getLocation();   
+				   	 int msg1 = signal.getMessage()[0];
+				   	 int msg2 = signal.getMessage()[1];
+				   	 switch(msg1){
+				   	 //Handle Scout messages that about map bounds
+				   	 	case messageConstants.SMBN:
+				   	 	case messageConstants.AMBN:
+				   	 		//Set map bounds
+				   	 		msg2 = Messaging.adjustBound(msg2);
+				   	 		setMapBound(Direction.NORTH, msg2);
+				   	 		break;
+				   	 	case messageConstants.SMBE:
+				   	 	case messageConstants.AMBE:
+				   	 		msg2 = Messaging.adjustBound(msg2);
+				   	 		setMapBound(Direction.EAST, msg2);		
+				   	 		break;
+				   	 	case messageConstants.SMBS:
+				   	 	case messageConstants.AMBS:
+				   	 		msg2 = Messaging.adjustBound(msg2);
+				   	 		setMapBound(Direction.SOUTH, msg2);
+				   	 		break;
+				   	 	case messageConstants.SMBW:
+				   	 	case messageConstants.AMBW:
+				   	 		msg2 = Messaging.adjustBound(msg2);
+				   	 		setMapBound(Direction.WEST, msg2);
+				   	 		break;
+				   	 		
+				   	 }
+
+				}
+            }			
+			
+		}
+	
+	}
+
+	public static void reportDens(){
+//		for(RobotInfo robot : nearbyEnemies){
+//			if(robot.type == RobotType.ZOMBIEDEN &&){
+//				rc.broadcastMessageSignal(messageConstants.DENX, , radiusSquared);
+//			}
+//		}
+	}
+	
+    //Given a direction, try to move that way, but avoid taking damage or going far into enemy LOF.
+    //General Scout exploration driver.
+	//Don't let scout get stuck in concave areas, or near swarms of allies.
+    public static void pathDirectionAvoidEnemies(Direction dir){
+    	
+    }
 	
 	public static void run(){
 	    while (true) {
 	        try {
-	        	emptyIndicatorStrings();
-            	updateNearbyEnemies();
-            	handleMessageQueue();
+            	Debug.emptyIndicatorStrings();
+            	Sensing.updateNearbyEnemies();
+            	ScoutMessaging.handleMessageQueue();
             	
             	//Wander out into the wilderness
             	//find anything of interest
