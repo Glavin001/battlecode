@@ -1,4 +1,4 @@
-package shazbot;
+package team181;
 
 import battlecode.common.Clock;
 import battlecode.common.Direction;
@@ -7,8 +7,9 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
-import shazbot.RobotPlayer.Messaging;
-import shazbot.RobotPlayer.messageConstants;
+import team181.RobotPlayer.Messaging;
+import team181.RobotPlayer.messageConstants;
+
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;

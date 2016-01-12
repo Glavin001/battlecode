@@ -1,4 +1,4 @@
-package shazbot;
+package team181;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +12,10 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
-import shazbot.RobotPlayer.Debug;
-import shazbot.RobotPlayer.Messaging;
-import shazbot.RobotPlayer.Sensing;
-import shazbot.RobotPlayer.messageConstants;
+import team181.RobotPlayer.Debug;
+import team181.RobotPlayer.Messaging;
+import team181.RobotPlayer.Sensing;
+import team181.RobotPlayer.messageConstants;
 
 public class ScoutClass extends RobotPlayer {
 

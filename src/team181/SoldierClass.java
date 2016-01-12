@@ -1,12 +1,13 @@
-package shazbot;
+package team181;
 
 import battlecode.common.Clock;
 import battlecode.common.Team;
-import shazbot.RobotPlayer.Debug;
-import shazbot.RobotPlayer.Messaging;
-import shazbot.RobotPlayer.Sensing;
+import team181.RobotPlayer.Debug;
+import team181.RobotPlayer.Messaging;
+import team181.RobotPlayer.Sensing;
 
-public class GuardClass extends RobotPlayer {
+public class SoldierClass extends RobotPlayer {
+
     public static void run() {
         while (true) {
             try {

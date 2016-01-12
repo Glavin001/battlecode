@@ -1,4 +1,4 @@
-package shazbot;
+package team181;
 
 import battlecode.common.*;
 
