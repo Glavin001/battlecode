@@ -7,6 +7,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
+import shazbot.RobotPlayer.Messaging;
 import shazbot.RobotPlayer.messageConstants;
 
 public class ArchonClass extends RobotPlayer{
@@ -30,18 +31,22 @@ public class ArchonClass extends RobotPlayer{
 				   	 		//Propagate the message to nearby scouts and archons
 				   	 		rc.broadcastMessageSignal(messageConstants.AMBN, msg2, defaultBroadcastRange);
 				   	 		//Set map bounds
+				   	 		msg2 = Messaging.adjustBound(msg2);
 				   	 		setMapBound(Direction.NORTH, msg2);
 				   	 		break;
 				   	 	case messageConstants.SMBE:
 				   	 		rc.broadcastMessageSignal(messageConstants.AMBE, msg2, defaultBroadcastRange);
+				   	 		msg2 = Messaging.adjustBound(msg2);
 				   	 		setMapBound(Direction.EAST, msg2);		
 				   	 		break;
 				   	 	case messageConstants.SMBS:
 				   	 		rc.broadcastMessageSignal(messageConstants.AMBS, msg2, defaultBroadcastRange);
+				   	 		msg2 = Messaging.adjustBound(msg2);				   	 		
 				   	 		setMapBound(Direction.SOUTH, msg2);
 				   	 		break;
 				   	 	case messageConstants.SMBW:
 				   	 		rc.broadcastMessageSignal(messageConstants.AMBW, msg2, defaultBroadcastRange);
+				   	 		msg2 = Messaging.adjustBound(msg2);
 				   	 		setMapBound(Direction.WEST, msg2);
 				   	 		break;
 				   	 		

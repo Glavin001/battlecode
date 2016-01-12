@@ -83,10 +83,10 @@ public class ScoutClass extends RobotPlayer{
 		
 		public static void broadcastMapBounds() throws GameActionException{
 			int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
-			rc.broadcastMessageSignal(messageConstants.SMBN, northBound, distToNearestArchon);
-			rc.broadcastMessageSignal(messageConstants.SMBE, eastBound, distToNearestArchon);
-			rc.broadcastMessageSignal(messageConstants.SMBS, southBound, distToNearestArchon);
-			rc.broadcastMessageSignal(messageConstants.SMBW, westBound, distToNearestArchon);
+			rc.broadcastMessageSignal(messageConstants.SMBN, Messaging.adjustBound(northBound), distToNearestArchon);
+			rc.broadcastMessageSignal(messageConstants.SMBE, Messaging.adjustBound(eastBound), distToNearestArchon);
+			rc.broadcastMessageSignal(messageConstants.SMBS, Messaging.adjustBound(southBound), distToNearestArchon);
+			rc.broadcastMessageSignal(messageConstants.SMBW, Messaging.adjustBound(westBound), distToNearestArchon);
 			haveBroadCastedMapBounds = true;
 		}
 		
@@ -128,18 +128,22 @@ public class ScoutClass extends RobotPlayer{
 				   	 	case messageConstants.SMBN:
 				   	 	case messageConstants.AMBN:
 				   	 		//Set map bounds
+				   	 		msg2 = Messaging.adjustBound(msg2);
 				   	 		setMapBound(Direction.NORTH, msg2);
 				   	 		break;
 				   	 	case messageConstants.SMBE:
 				   	 	case messageConstants.AMBE:
+				   	 		msg2 = Messaging.adjustBound(msg2);
 				   	 		setMapBound(Direction.EAST, msg2);		
 				   	 		break;
 				   	 	case messageConstants.SMBS:
 				   	 	case messageConstants.AMBS:
+				   	 		msg2 = Messaging.adjustBound(msg2);
 				   	 		setMapBound(Direction.SOUTH, msg2);
 				   	 		break;
 				   	 	case messageConstants.SMBW:
 				   	 	case messageConstants.AMBW:
+				   	 		msg2 = Messaging.adjustBound(msg2);
 				   	 		setMapBound(Direction.WEST, msg2);
 				   	 		break;
 				   	 		
