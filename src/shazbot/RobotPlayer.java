@@ -177,7 +177,7 @@ public class RobotPlayer {
     	//Fix for transmitting negative bounds.
         //Use this to before transmitting and receiving bounds
     	public static int adjustBound(int bound){
-    		int offset = 20000;
+    		int offset = 40000;
     		if(bound > 16000) bound = bound - offset;
     		else if(bound < 0) bound = bound + offset;
     		return bound;
