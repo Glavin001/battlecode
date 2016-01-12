@@ -18,6 +18,7 @@ public class RobotPlayer {
             Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
     static RobotType[] robotTypes = {RobotType.SCOUT, RobotType.SOLDIER, RobotType.SOLDIER, RobotType.SOLDIER,
             RobotType.GUARD, RobotType.GUARD, RobotType.VIPER, RobotType.TURRET};
+    
     static RobotInfo[] nearbyEnemies;
     static RobotInfo[] nearbyTraitors;
     static RobotInfo[] nearbyAllies;
@@ -30,6 +31,37 @@ public class RobotPlayer {
     static Team enemyTeam;
     static RobotType myRobotType;
     static MapLocation nearestArchon;
+    //Copy of signal queue
+    static Signal[] currentSignals;
+    //Map bounds
+    static int northBound = 0;
+    static int eastBound = 0;
+    static int southBound = 0;
+    static int westBound = 0;
+    static boolean nbs = false;
+    static boolean ebs = false;
+    static boolean sbs = false;
+    static boolean wbs = false;
+    static boolean allBoundsSet = false;
+    
+    //Message types
+    static class messageConstants{
+    	
+    	//Nearest Archon Location
+    	public final static int NEAL = 55555;
+    	
+    	//Scout Map Bounds North
+    	public final static int SMBN = 12345;
+    	public final static int SMBE = 22345;
+    	public final static int SMBS = 32345;
+    	public final static int SMBW = 42345;
+    	//Archon Map Bounds North
+    	public final static int AMBN = 54321;
+    	public final static int AMBE = 44321;
+    	public final static int AMBS = 34321;
+    	public final static int AMBW = 24321;
+    	
+    }
     
     static class Movement{
     	
@@ -95,7 +127,6 @@ public class RobotPlayer {
     	    }
     }
 
-    
     static class Offensive{
     	public static void attack() throws GameActionException{
         	attack(null);
@@ -126,34 +157,65 @@ public class RobotPlayer {
         }    	
     }
     
-    
-    public static void updateNearbyEnemies(){
-    	nearbyEnemies = rc.senseHostileRobots(rc.getLocation(), myRobotType.sensorRadiusSquared);  	
-    	nearbyTraitors = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, enemyTeam);
-    	nearbyAllies = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, myTeam);
-    	veryCloseAllies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, myTeam);
-    	attackableTraitors = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, enemyTeam);
-    	attackableZombies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, Team.ZOMBIE);
+    static class Messaging{
+    	//Basic handling for message queuing, nearest archon
+        public static void handleMessageQueue(){
+       	 currentSignals = rc.emptySignalQueue();
+            if (currentSignals.length > 0) {
+                //rc.setIndicatorString(0, "I received a signal this turn!");
+           	 for(Signal signal : currentSignals){
+               	 MapLocation loc = signal.getLocation();   
+               	 rc.setIndicatorString(1, "Message Recieved was: " + Integer.toString(signal.getMessage()[0]) + " " + Integer.toString(signal.getMessage()[1]));
+               	 //Set the nearest archon location if appropriate message was recieved.
+               	 if(signal.getMessage()[0] == messageConstants.NEAL){
+               		 nearestArchon = loc;
+               	 }
+           	 }
+            }
+       }
     }
     
-    public static void handleMessageQueue(){
-    	 Signal[] signals = rc.emptySignalQueue();
-         if (signals.length > 0) {
-             //rc.setIndicatorString(0, "I received a signal this turn!");
-        	 for(Signal signal : signals){
-            	 MapLocation loc = signal.getLocation();   
-            	 //rc.setIndicatorString(1, "The location recieved was:" + loc.toString());
-            	 //Assume that the transmitted signal was for the archon location
-            	 nearestArchon = loc;
-        	 }
-         }
+    static class Sensing{
+        public static void updateNearbyEnemies(){
+        	nearbyEnemies = rc.senseHostileRobots(rc.getLocation(), myRobotType.sensorRadiusSquared);  	
+        	nearbyTraitors = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, enemyTeam);
+        	nearbyAllies = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, myTeam);
+        	veryCloseAllies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, myTeam);
+        	attackableTraitors = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, enemyTeam);
+        	attackableZombies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, Team.ZOMBIE);
+        }   	
+    }
+
+    static class Debug{
+    	//Prevent indicator string for persisting longer than 1 turn
+        public static void emptyIndicatorStrings(){
+        	for(int i = 0; i < 3; i++){
+        		rc.setIndicatorString(i, "");
+        	}
+        }   	
     }
     
-    public static void emptyIndicatorStrings(){
-    	for(int i = 0; i < 3; i++){
-    		rc.setIndicatorString(i, "");
-    	}
-    }
+	public static void setMapBound(Direction dir, int bound){
+		if(!allBoundsSet){
+			if(dir == Direction.NORTH){
+				northBound = bound;
+				nbs = true;
+			}else if(dir == Direction.EAST){
+				eastBound = bound;
+				ebs = true;
+			}else if(dir == Direction.SOUTH){
+				southBound = bound;
+				sbs = true;
+			}else if(dir == Direction.WEST){
+				westBound = bound;
+				wbs = true;
+			}
+			if(nbs && ebs && sbs && wbs){
+				allBoundsSet = true;
+			}
+		}
+	}
+    
     
     public static void run(RobotController inrc) {
         // You can instantiate variables here.

@@ -2,15 +2,18 @@ package shazbot;
 
 import battlecode.common.Clock;
 import battlecode.common.Team;
+import shazbot.RobotPlayer.Debug;
+import shazbot.RobotPlayer.Messaging;
+import shazbot.RobotPlayer.Sensing;
 
 public class SoldierClass extends RobotPlayer{
 	
 	public static void run(){
 	    while (true) {
 	        try {
-	        	emptyIndicatorStrings();
-            	updateNearbyEnemies();
-            	handleMessageQueue();
+            	Debug.emptyIndicatorStrings();
+            	Sensing.updateNearbyEnemies();
+            	Messaging.handleMessageQueue();
             	
             	//If there are more enemies than allies nearby, retreat to the nearest archon.
             	if(attackableTraitors.length + attackableZombies.length > veryCloseAllies.length){

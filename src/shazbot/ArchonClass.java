@@ -3,12 +3,57 @@ package shazbot;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Signal;
+import shazbot.RobotPlayer.messageConstants;
 
 public class ArchonClass extends RobotPlayer{
-
 	
+	static int defaultBroadcastRange = 2000;
+
+	static class ArchonMessaging{
+		
+		public static void handleMessageQueue() throws GameActionException{
+			//SUPER
+			Messaging.handleMessageQueue();
+			//currentSignals[] is now set for this round. Overflow may cause problems.
+            if (currentSignals.length > 0) {
+				for(Signal signal : currentSignals){
+				   	 MapLocation loc = signal.getLocation();   
+				   	 int msg1 = signal.getMessage()[0];
+				   	 int msg2 = signal.getMessage()[1];
+				   	 switch(msg1){
+				   	 //Handle Scout messages that about map bounds
+				   	 	case messageConstants.SMBN:
+				   	 		//Propagate the message to nearby scouts and archons
+				   	 		rc.broadcastMessageSignal(messageConstants.AMBN, msg2, defaultBroadcastRange);
+				   	 		//Set map bounds
+				   	 		setMapBound(Direction.NORTH, msg2);
+				   	 		break;
+				   	 	case messageConstants.SMBE:
+				   	 		rc.broadcastMessageSignal(messageConstants.AMBE, msg2, defaultBroadcastRange);
+				   	 		setMapBound(Direction.EAST, msg2);		
+				   	 		break;
+				   	 	case messageConstants.SMBS:
+				   	 		rc.broadcastMessageSignal(messageConstants.AMBS, msg2, defaultBroadcastRange);
+				   	 		setMapBound(Direction.SOUTH, msg2);
+				   	 		break;
+				   	 	case messageConstants.SMBW:
+				   	 		rc.broadcastMessageSignal(messageConstants.AMBW, msg2, defaultBroadcastRange);
+				   	 		setMapBound(Direction.WEST, msg2);
+				   	 		break;
+				   	 		
+				   	 }
+
+				}
+            }			
+			
+		}
+	}
+	
+
 	
 	static class Building{
 		//Tries to build a given unit in a random adjacent location.
@@ -29,7 +74,7 @@ public class ArchonClass extends RobotPlayer{
 	                        rc.build(dirToBuild, typeToBuild);
 	                        // Broadcast to nearby units our location, so they save it.
 	                        // Just a note that broadcasting increases core delay, try to minimize it!
-	                        rc.broadcastMessageSignal((int)'A',(int)'A', broadcastDistance);
+	                        rc.broadcastMessageSignal(messageConstants.NEAL,(int)'A', broadcastDistance);
 	                        return true;
 	                    } else {
 	                        // Rotate the direction to try
@@ -48,6 +93,7 @@ public class ArchonClass extends RobotPlayer{
 		}
 	}
 	
+	
 	public static void run(){	
 		
 		RobotType[] unitsToBuild = {RobotType.GUARD, RobotType.SCOUT};
@@ -56,13 +102,15 @@ public class ArchonClass extends RobotPlayer{
 		
         while (true) {
             try {
-            	emptyIndicatorStrings();
-            	updateNearbyEnemies();
-            	handleMessageQueue();
+            	Debug.emptyIndicatorStrings();
+            	Sensing.updateNearbyEnemies();
+            	ArchonMessaging.handleMessageQueue();
             	if(canChooseNextUnit){
             		nextUnitToBuild = rand.nextInt(unitsToBuild.length);
             		canChooseNextUnit = false;
             	}
+            	
+            	rc.setIndicatorString(2, "All bounds known?: " + " " + Boolean.toString(allBoundsSet) + Integer.toString(northBound) + "was nb and eb is: " + Integer.toString(eastBound));
             	
             	//Build turrets at the start, remove this later
                 if(rc.getRoundNum() < 120){
