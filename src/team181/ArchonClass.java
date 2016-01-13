@@ -176,7 +176,7 @@ public class ArchonClass extends RobotPlayer {
 
     public static void run() {
 
-        RobotType[] unitsToBuild = { RobotType.GUARD, RobotType.SCOUT };
+        RobotType[] unitsToBuild = { RobotType.GUARD, RobotType.SOLDIER, RobotType.VIPER };
         int nextUnitToBuild = rand.nextInt(unitsToBuild.length);
         boolean canChooseNextUnit = false;
         initialize();
@@ -199,11 +199,21 @@ public class ArchonClass extends RobotPlayer {
                     rc.setIndicatorString(2,
                             "Den: " + Integer.toString(fate + 1) + " " + knownDens.get(fate).toString());
                 }
-
-                // Build turrets at the start, remove this later
-                if (rc.getRoundNum() < 120) {
+                
+                // Build Scouts at the start
+                if (rc.getRoundNum() < 80 ||
+                        (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 5)) {
                     Building.tryBuildUnit(RobotType.TURRET);
+                } else if (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 1) {
+                    Building.tryBuildUnit(RobotType.GUARD);
+                } else if (Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) >= attackableZombies.length) {
+                    Building.tryBuildUnit(RobotType.GUARD);
+                } else if (rc.getRoundNum() < 120) {
+                    Building.tryBuildUnit(RobotType.SCOUT);
                     // Otherwise build a random unit from list above
+//                } else if (rc.getRoundNum() < 200) {
+//                        Building.tryBuildUnit(RobotType.TURRET);
+//                        // Otherwise build a random unit from list above
                 } else {
                     // If we successfully built a unit, we get to choose another
                     // one.

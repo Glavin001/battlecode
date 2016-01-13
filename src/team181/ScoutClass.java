@@ -85,6 +85,7 @@ public class ScoutClass extends RobotPlayer {
                   MapLocation nextLoc = currLoc.add(currDir);
                   double risk = attackRisk(nextLoc);
                   risks[i] = risk;
+                  rc.setIndicatorDot(nextLoc, (int) Math.min(255, risk), 0, 0);
                   // System.out.println("At location" +
                   // currLoc.toString() + " risk in direction " +
                   // currDir.toString() + " is: " +
