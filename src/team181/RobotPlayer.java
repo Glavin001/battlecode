@@ -73,46 +73,6 @@ public class RobotPlayer {
     static int maxID = 32000;
 
     /**
-     * Message types
-     *
-     */
-    static class messageConstants {
-
-        /**
-         *  Nearest Ally Archon Location
-         */
-        public final static int NAAL = 55555;
-        /**
-         * Enemy Archon Location.x
-         */
-        public final static int EALX = 55565;
-        /**
-         * Enemy Archon Location.y
-         */
-        public final static int EALY = 55655;
-
-        /**
-         *  Scout Map Bounds North
-         */
-        public final static int SMBN = 12345;
-        public final static int SMBE = 22345;
-        public final static int SMBS = 32345;
-        public final static int SMBW = 42345;
-        /**
-         *  Archon Map Bounds North
-         */
-        public final static int AMBN = 54321;
-        public final static int AMBE = 44321;
-        public final static int AMBS = 34321;
-        public final static int AMBW = 24321;
-        
-        
-        public final static int DENX = 666660;
-        public final static int DENY = 666661;
-
-    }
-
-    /**
      * Movement
      *
      */
@@ -269,14 +229,14 @@ public class RobotPlayer {
                     // Set the nearest archon location if appropriate message
                     // was received.
                     switch (msg1) {
-                        case (messageConstants.NAAL) :
+                        case (MessageTags.NAAL) :
                                 nearestArchon = loc;
                             break;
                             // Handle reporting of enemy archon locations
-                        case messageConstants.EALX:
+                        case MessageTags.EALX:
                             tempLoc = new MapLocation(msg2, loc.y);
                             break;
-                        case messageConstants.EALY:
+                        case MessageTags.EALY:
                             nearestEnemyArchon = new MapLocation(tempLoc.x, msg2);
 //                            System.out.println("received enemy archon location: "+nearestEnemyArchon.toString());
                             break;
@@ -286,16 +246,6 @@ public class RobotPlayer {
             }
         }
 
-        // Fix for transmitting negative bounds.
-        // Use this to before transmitting and receiving bounds
-        public static int adjustBound(int bound) {
-            int offset = 40000;
-            if (bound > 16000)
-                bound = bound - offset;
-            else if (bound < 0)
-                bound = bound + offset;
-            return bound;
-        }
     }
 
     static class Sensing {

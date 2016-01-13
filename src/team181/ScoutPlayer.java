@@ -92,10 +92,10 @@ public class ScoutPlayer extends RobotPlayer {
 
         public static void broadcastMapBounds() throws GameActionException {
             int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
-            rc.broadcastMessageSignal(messageConstants.SMBN, Messaging.adjustBound(northBound), distToNearestArchon);
-            rc.broadcastMessageSignal(messageConstants.SMBE, Messaging.adjustBound(eastBound), distToNearestArchon);
-            rc.broadcastMessageSignal(messageConstants.SMBS, Messaging.adjustBound(southBound), distToNearestArchon);
-            rc.broadcastMessageSignal(messageConstants.SMBW, Messaging.adjustBound(westBound), distToNearestArchon);
+            rc.broadcastMessageSignal(MessageTags.SMBN, Messaging.adjustBound(northBound), distToNearestArchon);
+            rc.broadcastMessageSignal(MessageTags.SMBE, Messaging.adjustBound(eastBound), distToNearestArchon);
+            rc.broadcastMessageSignal(MessageTags.SMBS, Messaging.adjustBound(southBound), distToNearestArchon);
+            rc.broadcastMessageSignal(MessageTags.SMBW, Messaging.adjustBound(westBound), distToNearestArchon);
             haveBroadCastedMapBounds = true;
         }
 
@@ -141,24 +141,24 @@ public class ScoutPlayer extends RobotPlayer {
                     int msg2 = signal.getMessage()[1];
                     switch (msg1) {
                     // Handle Scout messages that about map bounds
-                    case messageConstants.SMBN:
-                    case messageConstants.AMBN:
+                    case MessageTags.SMBN:
+                    case MessageTags.AMBN:
                         // Set map bounds
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.NORTH, msg2);
                         break;
-                    case messageConstants.SMBE:
-                    case messageConstants.AMBE:
+                    case MessageTags.SMBE:
+                    case MessageTags.AMBE:
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.EAST, msg2);
                         break;
-                    case messageConstants.SMBS:
-                    case messageConstants.AMBS:
+                    case MessageTags.SMBS:
+                    case MessageTags.AMBS:
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.SOUTH, msg2);
                         break;
-                    case messageConstants.SMBW:
-                    case messageConstants.AMBW:
+                    case MessageTags.SMBW:
+                    case MessageTags.AMBW:
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.WEST, msg2);
                         break;
@@ -194,9 +194,9 @@ public class ScoutPlayer extends RobotPlayer {
                     // Otherwise we are dealing with a new den.
                     knownDens.add(new MapLocation(robot.location.x, robot.location.y));
                 }
-                rc.broadcastMessageSignal(messageConstants.DENX, Messaging.adjustBound(robot.location.x),
+                rc.broadcastMessageSignal(MessageTags.DENX, Messaging.adjustBound(robot.location.x),
                         distToNearestArchon);
-                rc.broadcastMessageSignal(messageConstants.DENY, Messaging.adjustBound(robot.location.y),
+                rc.broadcastMessageSignal(MessageTags.DENY, Messaging.adjustBound(robot.location.y),
                         distToNearestArchon);
                 rc.setIndicatorString(2, "I transmitted denLocation this turn");
             }
@@ -219,9 +219,9 @@ public class ScoutPlayer extends RobotPlayer {
                 if (r.type.equals(RobotType.ARCHON)) {
                     didJustBroadcast = true;
                     int distToNearestArchon = 10000; //nearestArchon.distanceSquaredTo(rc.getLocation());
-                    rc.broadcastMessageSignal(messageConstants.EALX, r.location.x,
+                    rc.broadcastMessageSignal(MessageTags.EALX, r.location.x,
                             distToNearestArchon);
-                    rc.broadcastMessageSignal(messageConstants.EALY, r.location.y,
+                    rc.broadcastMessageSignal(MessageTags.EALY, r.location.y,
                             distToNearestArchon);
                     rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: "+r.location.toString());
 //                    System.out.println("I transmitted Enemy Archon Location this turn: "+r.location.toString());

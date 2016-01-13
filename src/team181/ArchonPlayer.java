@@ -54,36 +54,36 @@ public class ArchonPlayer extends RobotPlayer {
                     int id = signal.getID();
                     switch (msg1) {
                     // Handle Scout messages about map bounds
-                    case messageConstants.SMBN:
+                    case MessageTags.SMBN:
                         // Propagate the message to nearby scouts and archons
-                        rc.broadcastMessageSignal(messageConstants.AMBN, msg2, defaultBroadcastRange);
+                        rc.broadcastMessageSignal(MessageTags.AMBN, msg2, defaultBroadcastRange);
                         // Set map bounds
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.NORTH, msg2);
                         break;
-                    case messageConstants.SMBE:
-                        rc.broadcastMessageSignal(messageConstants.AMBE, msg2, defaultBroadcastRange);
+                    case MessageTags.SMBE:
+                        rc.broadcastMessageSignal(MessageTags.AMBE, msg2, defaultBroadcastRange);
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.EAST, msg2);
                         break;
-                    case messageConstants.SMBS:
-                        rc.broadcastMessageSignal(messageConstants.AMBS, msg2, defaultBroadcastRange);
+                    case MessageTags.SMBS:
+                        rc.broadcastMessageSignal(MessageTags.AMBS, msg2, defaultBroadcastRange);
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.SOUTH, msg2);
                         break;
-                    case messageConstants.SMBW:
-                        rc.broadcastMessageSignal(messageConstants.AMBW, msg2, defaultBroadcastRange);
+                    case MessageTags.SMBW:
+                        rc.broadcastMessageSignal(MessageTags.AMBW, msg2, defaultBroadcastRange);
                         msg2 = Messaging.adjustBound(msg2);
                         setMapBound(Direction.WEST, msg2);
                         break;
 
                     // Handle reporting of zombie dens
-                    case messageConstants.DENX:
-                        storeDenLocation(msg2, id, messageConstants.DENX);
+                    case MessageTags.DENX:
+                        storeDenLocation(msg2, id, MessageTags.DENX);
                         break;
-                    case messageConstants.DENY:
+                    case MessageTags.DENY:
                         msg2 = Messaging.adjustBound(msg2);
-                        storeDenLocation(msg2, id, messageConstants.DENY);
+                        storeDenLocation(msg2, id, MessageTags.DENY);
                         break;
                         
                     }
@@ -113,7 +113,7 @@ public class ArchonPlayer extends RobotPlayer {
                     }
                     // Create a new map location at the reported spot.
                     MapLocation denLoc;
-                    if (denXOrDenY == messageConstants.DENX) {
+                    if (denXOrDenY == MessageTags.DENX) {
                         denLoc = new MapLocation(coordinate, oldCoordinate);
                     } else {
                         denLoc = new MapLocation(oldCoordinate, coordinate);
@@ -129,10 +129,10 @@ public class ArchonPlayer extends RobotPlayer {
         }
 
         public static void broadcastMapBounds() throws GameActionException {
-            rc.broadcastMessageSignal(messageConstants.AMBN, Messaging.adjustBound(northBound), defaultBroadcastRange);
-            rc.broadcastMessageSignal(messageConstants.AMBE, Messaging.adjustBound(eastBound), defaultBroadcastRange);
-            rc.broadcastMessageSignal(messageConstants.AMBS, Messaging.adjustBound(southBound), defaultBroadcastRange);
-            rc.broadcastMessageSignal(messageConstants.AMBW, Messaging.adjustBound(westBound), defaultBroadcastRange);
+            rc.broadcastMessageSignal(MessageTags.AMBN, Messaging.adjustBound(northBound), defaultBroadcastRange);
+            rc.broadcastMessageSignal(MessageTags.AMBE, Messaging.adjustBound(eastBound), defaultBroadcastRange);
+            rc.broadcastMessageSignal(MessageTags.AMBS, Messaging.adjustBound(southBound), defaultBroadcastRange);
+            rc.broadcastMessageSignal(MessageTags.AMBW, Messaging.adjustBound(westBound), defaultBroadcastRange);
         }
     }
 
@@ -162,11 +162,11 @@ public class ArchonPlayer extends RobotPlayer {
                             // save it.
                             // Just a note that broadcasting increases core
                             // delay, try to minimize it!
-                            rc.broadcastMessageSignal(messageConstants.NAAL, (int) 'A', broadcastDistance);
+                            rc.broadcastMessageSignal(MessageTags.NAAL, (int) 'A', broadcastDistance);
                             if (nearestEnemyArchon != null) {
                                 // Broadcast where enemy archon is
-                                rc.broadcastMessageSignal(messageConstants.EALX, nearestEnemyArchon.x, broadcastDistance);
-                                rc.broadcastMessageSignal(messageConstants.EALY, nearestEnemyArchon.y, broadcastDistance);
+                                rc.broadcastMessageSignal(MessageTags.EALX, nearestEnemyArchon.x, broadcastDistance);
+                                rc.broadcastMessageSignal(MessageTags.EALY, nearestEnemyArchon.y, broadcastDistance);
 //                                System.out.println("Broadcasting enemy archon: "+nearestEnemyArchon.toString());
                             }
                             // If it is a scout, tell it the new bounds that we
