@@ -15,6 +15,10 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Archon player code
+ *
+ */
 public class ArchonPlayer extends RobotPlayer {
 
     static RobotType[] unitsToBuild = { RobotType.GUARD,

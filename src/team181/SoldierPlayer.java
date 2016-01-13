@@ -9,6 +9,10 @@ import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
 
+/**
+ * Soldier player
+ *
+ */
 public class SoldierPlayer extends RobotPlayer {
 
     static double retreatHealthPercent = 0.0;
