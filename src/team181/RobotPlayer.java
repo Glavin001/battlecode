@@ -1,6 +1,7 @@
 package team181;
 
 import battlecode.common.*;
+import team181.RobotPlayer.Sensing;
 
 import java.util.Random;
 
@@ -262,26 +263,71 @@ public class RobotPlayer {
         enemyTeam = myTeam.opponent();
         myAttackRange = rc.getType().attackRadiusSquared;
         myRobotType = rc.getType();
-
-        switch (rc.getType()) {
+        loop();
+    }
+    
+    public static void loop() {
+        switch (myRobotType) {
         case ARCHON:
-            ArchonClass.run();
+            ArchonPlayer.initialize();
             break;
         case TURRET:
-            TurretClass.run();
+            TurretPlayer.initialize();
             break;
         case SOLDIER:
-            SoldierClass.run();
+            SoldierPlayer.initialize();
             break;
         case GUARD:
-            GuardClass.run();
+            GuardPlayer.initialize();
             break;
         case VIPER:
-            ViperClass.run();
+            ViperPlayer.initialize();
             break;
         case SCOUT:
-            ScoutClass.run();
+            ScoutPlayer.initialize();
             break;
+        default:
+            System.out.println("Unknown Robot Type");
+            return;
+        }
+
+        while (true) {
+            try {
+                switch (myRobotType) {
+                case ARCHON:
+                    ArchonPlayer.tick();
+                    break;
+                case TURRET:
+                    TurretPlayer.tick();
+                    break;
+                case SOLDIER:
+                    SoldierPlayer.tick();
+                    break;
+                case GUARD:
+                    GuardPlayer.tick();
+                    break;
+                case VIPER:
+                    ViperPlayer.tick();
+                    break;
+                case SCOUT:
+                    ScoutPlayer.tick();
+                    break;
+                default:
+                    System.out.println("Unknown Robot Type");
+                    return;
+                }
+                Clock.yield();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
+    
+    public static void initialize() {}
+
+    public static void tick() throws GameActionException {
+        System.out.println("SUBCLASS SHOULD IMPLEMENT");
+    }
+    
 }

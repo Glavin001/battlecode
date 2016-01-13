@@ -14,7 +14,11 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ArchonClass extends RobotPlayer {
+public class ArchonPlayer extends RobotPlayer {
+
+    static RobotType[] unitsToBuild = { RobotType.GUARD, RobotType.SOLDIER, RobotType.VIPER };
+    static int nextUnitToBuild = rand.nextInt(unitsToBuild.length);
+    static boolean builtLastUnit = false;
 
     static int defaultBroadcastRange = 2000;
     // Are we waiting on a scout to complete a message?
@@ -149,6 +153,7 @@ public class ArchonClass extends RobotPlayer {
                             if (typeToBuild == RobotType.SCOUT && allBoundsSet) {
                                 ArchonMessaging.broadcastMapBounds();
                             }
+                            builtLastUnit = true;
                             return true;
                         } else {
                             // Rotate the direction to try
@@ -174,75 +179,80 @@ public class ArchonClass extends RobotPlayer {
         lastTransmissionID = new HashMap<Integer, Integer>();
     }
 
-    public static void run() {
+    public static void tick() throws GameActionException {
 
-        RobotType[] unitsToBuild = { RobotType.GUARD, RobotType.SOLDIER, RobotType.VIPER };
-        int nextUnitToBuild = rand.nextInt(unitsToBuild.length);
-        boolean canChooseNextUnit = false;
-        initialize();
+        Debug.emptyIndicatorStrings();
+        Sensing.updateNearbyEnemies();
+        ArchonMessaging.handleMessageQueue();
 
-        while (true) {
-            try {
-                Debug.emptyIndicatorStrings();
-                Sensing.updateNearbyEnemies();
-                ArchonMessaging.handleMessageQueue();
-                if (canChooseNextUnit) {
-                    nextUnitToBuild = rand.nextInt(unitsToBuild.length);
-                    canChooseNextUnit = false;
+        rc.setIndicatorString(2, "All bounds known?: " + " " + Boolean.toString(allBoundsSet)
+                + Integer.toString(northBound) + "was nb and eb is: " + Integer.toString(eastBound));
+        rc.setIndicatorString(2, "Number of known dens: " + Integer.toString(knownDens.size()));
+        if (!knownDens.isEmpty()) {
+            int fate = rand.nextInt(knownDens.size());
+            rc.setIndicatorString(2, "Den: " + Integer.toString(fate + 1) + " " + knownDens.get(fate).toString());
+        }
+
+        
+        Building.tryBuildUnit(nextRobotTypeToBuild());
+        
+        repairAllies(nearbyAllies);
+
+    }
+    
+    /**
+     * Determine what robot to build next
+     * 
+     * @return The type of robot to build next
+     */
+    static RobotType nextRobotTypeToBuild() {
+        
+        // Build Scouts at the start
+        if (rc.getRoundNum() < 80
+                || (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 3)) {
+            return RobotType.TURRET;
+        } else if (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 1) {
+            return RobotType.GUARD;
+        } else if (Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < attackableZombies.length) {
+            return RobotType.GUARD;
+        } else if (rc.getRoundNum() < 120) {
+            return RobotType.SCOUT;
+        } else {
+            // // Otherwise build a random unit from list above
+            if (builtLastUnit) {
+                // If we successfully built a unit, we get to choose another
+                // one.
+                // If we don't use this, we end up never building expensive
+                // units.
+                nextUnitToBuild = rand.nextInt(unitsToBuild.length);
+                builtLastUnit = false;
+//                System.out.println("NEXT UNIT");
+            }
+            return unitsToBuild[nextUnitToBuild];
+        }
+
+    }
+    
+    
+    /**
+     * Repair nearby allies
+     * 
+     * @param allies
+     * @throws GameActionException 
+     */
+    static void repairAllies(RobotInfo[] allies) throws GameActionException {
+        for (RobotInfo robot : nearbyAllies) {
+            if (robot.health < robot.maxHealth && robot.type != RobotType.ARCHON) {
+                rc.setIndicatorDot(robot.location, 80, 255, 80);
+                rc.setIndicatorString(1, "Repairing robot: " + Integer.toString(robot.ID));
+                // If we are within repair range of the robot, repair
+                // it, then break.
+                if (robot.location.distanceSquaredTo(rc.getLocation()) <= myAttackRange) {
+                    rc.repair(robot.location);
+                    break;
                 }
-
-                rc.setIndicatorString(2, "All bounds known?: " + " " + Boolean.toString(allBoundsSet)
-                        + Integer.toString(northBound) + "was nb and eb is: " + Integer.toString(eastBound));
-                rc.setIndicatorString(2, "Number of known dens: " + Integer.toString(knownDens.size()));
-                if (!knownDens.isEmpty()) {
-                    int fate = rand.nextInt(knownDens.size());
-                    rc.setIndicatorString(2,
-                            "Den: " + Integer.toString(fate + 1) + " " + knownDens.get(fate).toString());
-                }
-                
-                // Build Scouts at the start
-                if (rc.getRoundNum() < 80 ||
-                        (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 5)) {
-                    Building.tryBuildUnit(RobotType.TURRET);
-                } else if (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 1) {
-                    Building.tryBuildUnit(RobotType.GUARD);
-                } else if (Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) >= attackableZombies.length) {
-                    Building.tryBuildUnit(RobotType.GUARD);
-                } else if (rc.getRoundNum() < 120) {
-                    Building.tryBuildUnit(RobotType.SCOUT);
-                    // Otherwise build a random unit from list above
-//                } else if (rc.getRoundNum() < 200) {
-//                        Building.tryBuildUnit(RobotType.TURRET);
-//                        // Otherwise build a random unit from list above
-                } else {
-                    // If we successfully built a unit, we get to choose another
-                    // one.
-                    // If we don't use this, we end up never building expensive
-                    // units.
-                    if (Building.tryBuildUnit(unitsToBuild[nextUnitToBuild])) {
-                        canChooseNextUnit = true;
-                    }
-                }
-
-                // Repair nearby allies.
-                for (RobotInfo robot : nearbyAllies) {
-                    if (robot.health < robot.maxHealth && robot.type != RobotType.ARCHON) {
-                        rc.setIndicatorDot(robot.location, 80, 255, 80);
-                        rc.setIndicatorString(1, "Repairing robot: " + Integer.toString(robot.ID));
-                        // If we are within repair range of the robot, repair
-                        // it, then break.
-                        if (robot.location.distanceSquaredTo(rc.getLocation()) <= myAttackRange) {
-                            rc.repair(robot.location);
-                            break;
-                        }
-                    }
-                }
-
-                Clock.yield();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
             }
         }
+
     }
 }

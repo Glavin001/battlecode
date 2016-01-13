@@ -17,7 +17,7 @@ import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
 import team181.RobotPlayer.messageConstants;
 
-public class ScoutClass extends RobotPlayer {
+public class ScoutPlayer extends RobotPlayer {
 
     // Get the maximum number of tiles in one direction away in sensor radius
     static int myDv = (int) Math.floor(Math.sqrt(myRobotType.sensorRadiusSquared));
@@ -56,71 +56,71 @@ public class ScoutClass extends RobotPlayer {
         // General Scout exploration driver.
         // Don't let scout get stuck in concave areas, or near swarms of allies.
         public static void explore(Direction dirToMove) throws GameActionException {
-          if (rc.isCoreReady()) {
-            if (nearbyEnemies.length == 0) {
-              // There are no known enemy threats
-              if (rc.canMove(dirToMove)) {
-                rc.move(dirToMove);
-              } else if (rc.canMove(dirToMove.rotateLeft())) {
-                rc.move(dirToMove.rotateLeft());
-              } else if (rc.canMove(dirToMove.rotateRight())) {
-                rc.move(dirToMove.rotateRight());
-              }
-            } else {
-              // There are enemies within sight!
-              // Calculate least risking direction to move
-              MapLocation currLoc = rc.getLocation();
-              double leastRisk = Double.MAX_VALUE; // risks[0];
-              Direction leastRiskyDirection = Direction.NONE;
-              Direction[] allDirs = Direction.values();
-              MapLocation goalLoc = currLoc.add(dirToMove);
-              MapLocation leastRiskyLoc = goalLoc;
-              double[] risks = new double[allDirs.length];
-              for (int i = 0; i < allDirs.length; i++) {
-                // Check if can move in this direction
-                Direction currDir = allDirs[i];
-                if (rc.canMove(currDir)) {
-                  // Can move in this direction
-                  // Check attack risk value
-                  MapLocation nextLoc = currLoc.add(currDir);
-                  double risk = attackRisk(nextLoc);
-                  risks[i] = risk;
-                  rc.setIndicatorDot(nextLoc, (int) Math.min(255, risk), 0, 0);
-                  // System.out.println("At location" +
-                  // currLoc.toString() + " risk in direction " +
-                  // currDir.toString() + " is: " +
-                  // Double.toString(risk));
-                  // Is this better?
-                  // Bias towards moving the same direction, dirToMove
-                  if (currDir.equals(dirToMove) && risk <= leastRisk) {
-                    // At least as good
-                    leastRisk = risk;
-                    leastRiskyDirection = dirToMove;
-                    leastRiskyLoc = nextLoc;
-                  } else if (risk < leastRisk) {
-                    // Better
-                    leastRisk = risk;
-                    leastRiskyDirection = allDirs[i];
-                    leastRiskyLoc = nextLoc;
-                  } else if (risk == leastRisk && (goalLoc.distanceSquaredTo(nextLoc) < goalLoc
-                      .distanceSquaredTo(leastRiskyLoc))) {
-                    // Equally as good but closer to the original
-                    // dirToMove direction
-                    leastRisk = risk;
-                    leastRiskyDirection = allDirs[i];
-                    leastRiskyLoc = nextLoc;
-                  }
-                }
-              }
-              if (!leastRiskyDirection.equals(Direction.NONE)) {
-                // rc.setIndicatorString(2, "Retreating towards: " +
-                // leastRiskyDirection.toString());
-                rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
-                rc.move(leastRiskyDirection);
-              }
+            if (rc.isCoreReady()) {
+                if (nearbyEnemies.length == 0) {
+                    // There are no known enemy threats
+                    if (rc.canMove(dirToMove)) {
+                        rc.move(dirToMove);
+                    } else if (rc.canMove(dirToMove.rotateLeft())) {
+                        rc.move(dirToMove.rotateLeft());
+                    } else if (rc.canMove(dirToMove.rotateRight())) {
+                        rc.move(dirToMove.rotateRight());
+                    }
+                } else {
+                    // There are enemies within sight!
+                    // Calculate least risking direction to move
+                    MapLocation currLoc = rc.getLocation();
+                    double leastRisk = Double.MAX_VALUE; // risks[0];
+                    Direction leastRiskyDirection = Direction.NONE;
+                    Direction[] allDirs = Direction.values();
+                    MapLocation goalLoc = currLoc.add(dirToMove);
+                    MapLocation leastRiskyLoc = goalLoc;
+                    double[] risks = new double[allDirs.length];
+                    for (int i = 0; i < allDirs.length; i++) {
+                        // Check if can move in this direction
+                        Direction currDir = allDirs[i];
+                        if (rc.canMove(currDir)) {
+                            // Can move in this direction
+                            // Check attack risk value
+                            MapLocation nextLoc = currLoc.add(currDir);
+                            double risk = attackRisk(nextLoc);
+                            risks[i] = risk;
+                            rc.setIndicatorDot(nextLoc, (int) Math.min(255, risk), 0, 0);
+                            // System.out.println("At location" +
+                            // currLoc.toString() + " risk in direction " +
+                            // currDir.toString() + " is: " +
+                            // Double.toString(risk));
+                            // Is this better?
+                            // Bias towards moving the same direction, dirToMove
+                            if (currDir.equals(dirToMove) && risk <= leastRisk) {
+                                // At least as good
+                                leastRisk = risk;
+                                leastRiskyDirection = dirToMove;
+                                leastRiskyLoc = nextLoc;
+                            } else if (risk < leastRisk) {
+                                // Better
+                                leastRisk = risk;
+                                leastRiskyDirection = allDirs[i];
+                                leastRiskyLoc = nextLoc;
+                            } else if (risk == leastRisk && (goalLoc.distanceSquaredTo(nextLoc) < goalLoc
+                                    .distanceSquaredTo(leastRiskyLoc))) {
+                                // Equally as good but closer to the original
+                                // dirToMove direction
+                                leastRisk = risk;
+                                leastRiskyDirection = allDirs[i];
+                                leastRiskyLoc = nextLoc;
+                            }
+                        }
+                    }
+                    if (!leastRiskyDirection.equals(Direction.NONE)) {
+                        // rc.setIndicatorString(2, "Retreating towards: " +
+                        // leastRiskyDirection.toString());
+                        rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
+                        rc.move(leastRiskyDirection);
+                    }
 
+                }
             }
-          }
         }
 
         /*
@@ -133,35 +133,34 @@ public class ScoutClass extends RobotPlayer {
          *
          */
         public static double attackRisk(MapLocation loc) {
-          if (nearbyEnemies.length > 0) {
-            double totalRisk = 0.0;
-            for (RobotInfo r : nearbyEnemies) {
-              MapLocation enemyLoc = r.location;
-              RobotType enemyType = r.type;
-              int distAway = loc.distanceSquaredTo(enemyLoc);
-              int offsetBlocks = 2;
-              int offsetSquared = offsetBlocks * offsetBlocks;
-              int safeDist = (enemyType.attackRadiusSquared+offsetSquared);
-              if (enemyType.equals(RobotType.TURRET)) {
-                  safeDist = RobotType.TURRET.sensorRadiusSquared + offsetSquared;
-              }
-              if (distAway <= safeDist) {
-                // If enemy has 0 attack power then risk = 0
-                // If Core delay is 0 then risk = numerator, and will be
-                // divided by each turn/core delay
-                double risk = ((safeDist - distAway) * r.attackPower)
-                    / (r.weaponDelay + 1.0);
-                totalRisk += risk;
-              }
+            if (nearbyEnemies.length > 0) {
+                double totalRisk = 0.0;
+                for (RobotInfo r : nearbyEnemies) {
+                    MapLocation enemyLoc = r.location;
+                    RobotType enemyType = r.type;
+                    int distAway = loc.distanceSquaredTo(enemyLoc);
+                    int offsetBlocks = 2;
+                    int offsetSquared = offsetBlocks * offsetBlocks;
+                    int safeDist = (enemyType.attackRadiusSquared + offsetSquared);
+                    if (enemyType.equals(RobotType.TURRET)) {
+                        safeDist = RobotType.TURRET.sensorRadiusSquared + offsetSquared;
+                    }
+                    if (distAway <= safeDist) {
+                        // If enemy has 0 attack power then risk = 0
+                        // If Core delay is 0 then risk = numerator, and will be
+                        // divided by each turn/core delay
+                        double risk = ((safeDist - distAway) * r.attackPower) / (r.weaponDelay + 1.0);
+                        totalRisk += risk;
+                    }
+                }
+                // rc.setIndicatorString(2, "Risk this turn is: " +
+                // Double.toString(totalRisk));
+                System.out.println("The total risk for possible location " + loc.toString() + " was: "
+                        + Double.toString(totalRisk));
+                return totalRisk;
+            } else {
+                return 0.0;
             }
-            // rc.setIndicatorString(2, "Risk this turn is: " +
-            // Double.toString(totalRisk));
-            System.out.println("The total risk for possible location " + loc.toString() + " was: "
-                + Double.toString(totalRisk));
-            return totalRisk;
-          } else {
-            return 0.0;
-          }
         }
 
         // Tells us if a point in a given cardinal direction at our maximum
@@ -313,32 +312,24 @@ public class ScoutClass extends RobotPlayer {
 
     }
 
-    public static void run() {
-        while (true) {
-            try {
-                Debug.emptyIndicatorStrings();
-                Sensing.updateNearbyEnemies();
-                ScoutMessaging.handleMessageQueue();
-                // If we have found every bound
-                if (numExploredDirections == 4 || allBoundsSet == true) {
-                    reportDens();
-                }
-
-                // Wander out into the wilderness
-                // find anything of interest
-                // report back to archons when we have enough data
-                // Give report, follow squad that gets deployed
-                // Constantly broadcast to squad attack info
-                // Signal troops to retreat when attack is done, or failed, or
-                // when reinforcements are needed,
-                // or when zombie spawn is upcoming
-                Exploration.tryExplore();
-
-                Clock.yield();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
-            }
+    public static void tick() throws GameActionException {
+        Debug.emptyIndicatorStrings();
+        Sensing.updateNearbyEnemies();
+        ScoutMessaging.handleMessageQueue();
+        // If we have found every bound
+        if (numExploredDirections == 4 || allBoundsSet == true) {
+            reportDens();
         }
+
+        // Wander out into the wilderness
+        // find anything of interest
+        // report back to archons when we have enough data
+        // Give report, follow squad that gets deployed
+        // Constantly broadcast to squad attack info
+        // Signal troops to retreat when attack is done, or failed, or
+        // when reinforcements are needed,
+        // or when zombie spawn is upcoming
+        Exploration.tryExplore();
+
     }
 }
