@@ -29,9 +29,12 @@ public class ScoutPlayer extends RobotPlayer {
     static boolean[] haveOffsets = { false, false, false, false };
     static Direction currentExploreDirection = Direction.NORTH;
     static int numExploredDirections = 0;
+    static int numFoundArcons = 0;
     static boolean haveBroadCastedMapBounds = false;
     static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();;
     static int numKnownDens = 0;
+    
+    static boolean didJustBroadcast = false;
 
     // Enclosure for all of the exploration functions
     static class Exploration {
@@ -98,6 +101,9 @@ public class ScoutPlayer extends RobotPlayer {
 
         public static void tryExplore() throws GameActionException {
             // If we have not found every bound
+            if(didJustBroadcast) {
+                System.out.println("Found arcon but keep moving.");
+            }
             if (numExploredDirections != 4 && allBoundsSet != true) {
                 // If we don't already have a bound for this direction
                 if (!haveOffsets[returnCardinalIndex(currentExploreDirection)]) {
@@ -208,26 +214,23 @@ public class ScoutPlayer extends RobotPlayer {
     public static void tick() throws GameActionException {
         ScoutMessaging.handleMessageQueue();
         
-        if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0) {
+        if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && !didJustBroadcast) {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {
+                    didJustBroadcast = true;
                     int distToNearestArchon = 10000; //nearestArchon.distanceSquaredTo(rc.getLocation());
                     rc.broadcastMessageSignal(messageConstants.EALX, r.location.x,
                             distToNearestArchon);
                     rc.broadcastMessageSignal(messageConstants.EALY, r.location.y,
                             distToNearestArchon);
                     rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: "+r.location.toString());
-                    System.out.println("I transmitted Enemy Archon Location this turn: "+r.location.toString());
+//                    System.out.println("I transmitted Enemy Archon Location this turn: "+r.location.toString());
                     break;
                 }
             }
+        } else if (didJustBroadcast) {
+            didJustBroadcast = false;
         }
-        
-        // If we have found every bound
-        if (numExploredDirections == 4 || allBoundsSet == true) {
-            reportDens();
-        }
-
         // Wander out into the wilderness
         // find anything of interest
         // report back to archons when we have enough data
@@ -237,6 +240,11 @@ public class ScoutPlayer extends RobotPlayer {
         // when reinforcements are needed,
         // or when zombie spawn is upcoming
         Exploration.tryExplore();
+        
+        // If we have found every bound
+        if (numExploredDirections == 4 || allBoundsSet == true) {
+            reportDens();
+        }
 
     }
 }

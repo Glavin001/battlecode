@@ -105,7 +105,8 @@ public class RobotPlayer {
         public final static int AMBE = 44321;
         public final static int AMBS = 34321;
         public final static int AMBW = 24321;
-
+        
+        
         public final static int DENX = 666660;
         public final static int DENY = 666661;
 
@@ -419,9 +420,9 @@ public class RobotPlayer {
                 Sensing.updateNearbyEnemies();
                 if (nearestEnemyArchon != null) {
                     rc.setIndicatorString(3, "Enemy Archon @ "+nearestEnemyArchon.toString());
-                    System.out.println("Enemy archon @ "+nearestEnemyArchon.toString());
+//                    System.out.println("Enemy archon @ "+nearestEnemyArchon.toString());
                 } else {
-                    System.out.println("Unknown enemy archon location");
+//                    System.out.println("Unknown enemy archon location");
                 }
                 switch (myRobotType) {
                     case ARCHON:

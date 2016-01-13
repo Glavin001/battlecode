@@ -119,7 +119,7 @@ public class ArchonPlayer extends RobotPlayer {
                         denLoc = new MapLocation(oldCoordinate, coordinate);
                     }
                     knownDens.add(denLoc);
-                    System.out.println("I found a den this turn at: " + denLoc.toString());
+//                    System.out.println("I found a den this turn at: " + denLoc.toString());
                 }
             } else {
                 // Otherwise put in a new entry
@@ -209,7 +209,7 @@ public class ArchonPlayer extends RobotPlayer {
         if (nearestEnemyArchon != null) {
             rc.setIndicatorString(2, "Enemy Archon location: " + nearestEnemyArchon);
         } else {
-            System.out.println("unknown enemy archon location");
+//            System.out.println("unknown enemy archon location");
         }
         if (!knownDens.isEmpty()) {
             int fate = rand.nextInt(knownDens.size());
@@ -281,29 +281,21 @@ public class ArchonPlayer extends RobotPlayer {
      * @return The type of robot to build next
      */
     static RobotType nextRobotTypeToBuild() {
-
+        int roundNumber = rc.getRoundNum();
         // Build Scouts at the start
-        if (Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < attackableZombies.length) {
+        if (roundNumber < 20) {//This is not valid at start 
             return RobotType.GUARD;
-        } else if (rc.getRoundNum() < 80
-                || (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 3)) {
+        } else if (roundNumber < 80
+                || (roundNumber > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 3)) {
             return RobotType.TURRET;
-        } else if (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 1) {
+        } else if (roundNumber > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 2) {
             return RobotType.GUARD;
-        } else if (rc.getRoundNum() < 120) {
+        } else if (roundNumber < 120) {
             return RobotType.SCOUT;
+        } else if(roundNumber > 150) {
+            return RobotType.SOLDIER;
         } else {
-            // // Otherwise build a random unit from list above
-            if (builtLastUnit) {
-                // If we successfully built a unit, we get to choose another
-                // one.
-                // If we don't use this, we end up never building expensive
-                // units.
-                nextUnitToBuild = rand.nextInt(unitsToBuild.length);
-                builtLastUnit = false;
-                // System.out.println("NEXT UNIT");
-            }
-            return unitsToBuild[nextUnitToBuild];
+            return RobotType.GUARD;
         }
 
     }
