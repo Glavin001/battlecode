@@ -12,10 +12,11 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
+import team181.CommUtil.Message;
+import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
-import team181.RobotPlayer.messageConstants;
 
 /**
  * Scout player
@@ -92,11 +93,19 @@ public class ScoutPlayer extends RobotPlayer {
 
         public static void broadcastMapBounds() throws GameActionException {
             int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
-            rc.broadcastMessageSignal(MessageTags.SMBN, Messaging.adjustBound(northBound), distToNearestArchon);
-            rc.broadcastMessageSignal(MessageTags.SMBE, Messaging.adjustBound(eastBound), distToNearestArchon);
-            rc.broadcastMessageSignal(MessageTags.SMBS, Messaging.adjustBound(southBound), distToNearestArchon);
-            rc.broadcastMessageSignal(MessageTags.SMBW, Messaging.adjustBound(westBound), distToNearestArchon);
-            haveBroadCastedMapBounds = true;
+            
+            //Send north bound
+            Message message = new Message(MessageTags.SMBN, new MapLocation(rc.getLocation().x, northBound));
+            message.send(rc, distToNearestArchon);
+            //East
+            message = new Message(MessageTags.SMBE, new MapLocation(eastBound, rc.getLocation().y));
+            message.send(rc, distToNearestArchon);
+            //South
+            message = new Message(MessageTags.SMBS, new MapLocation(rc.getLocation().x, southBound));
+            message.send(rc, distToNearestArchon);
+            //West
+            message = new Message(MessageTags.SMBW, new MapLocation(westBound, rc.getLocation().y));
+            message.send(rc, distToNearestArchon);
         }
 
         public static void tryExplore() throws GameActionException {
@@ -136,31 +145,25 @@ public class ScoutPlayer extends RobotPlayer {
             // problems.
             if (currentSignals.length > 0) {
                 for (Signal signal : currentSignals) {
-                    MapLocation loc = signal.getLocation();
-                    int msg1 = signal.getMessage()[0];
-                    int msg2 = signal.getMessage()[1];
-                    switch (msg1) {
+                    Message message = new Message(signal);
+                    switch (message.getTag()) {
                     // Handle Scout messages that about map bounds
-                    case MessageTags.SMBN:
+                    case CommUtil.MessageTags.SMBN:
                     case MessageTags.AMBN:
                         // Set map bounds
-                        msg2 = Messaging.adjustBound(msg2);
-                        setMapBound(Direction.NORTH, msg2);
+                        setMapBound(Direction.NORTH, message.getLocation().y);
                         break;
                     case MessageTags.SMBE:
                     case MessageTags.AMBE:
-                        msg2 = Messaging.adjustBound(msg2);
-                        setMapBound(Direction.EAST, msg2);
+                        setMapBound(Direction.EAST, message.getLocation().x);
                         break;
                     case MessageTags.SMBS:
                     case MessageTags.AMBS:
-                        msg2 = Messaging.adjustBound(msg2);
-                        setMapBound(Direction.SOUTH, msg2);
+                        setMapBound(Direction.SOUTH, message.getLocation().y);
                         break;
                     case MessageTags.SMBW:
                     case MessageTags.AMBW:
-                        msg2 = Messaging.adjustBound(msg2);
-                        setMapBound(Direction.WEST, msg2);
+                        setMapBound(Direction.WEST, message.getLocation().x);
                         break;
 
                     }
@@ -176,7 +179,6 @@ public class ScoutPlayer extends RobotPlayer {
         int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
 
         for (RobotInfo robot : nearbyEnemies) {
-            // TODO:
             // Also check if the den exists in out list of knownDens
             if (robot.type == RobotType.ZOMBIEDEN) {
                 // Check known dens so we don't add duplicates
@@ -192,23 +194,13 @@ public class ScoutPlayer extends RobotPlayer {
                     continue;
                 } else {
                     // Otherwise we are dealing with a new den.
-                    knownDens.add(new MapLocation(robot.location.x, robot.location.y));
+                    knownDens.add(robot.location);
                 }
-                rc.broadcastMessageSignal(MessageTags.DENX, Messaging.adjustBound(robot.location.x),
-                        distToNearestArchon);
-                rc.broadcastMessageSignal(MessageTags.DENY, Messaging.adjustBound(robot.location.y),
-                        distToNearestArchon);
-                rc.setIndicatorString(2, "I transmitted denLocation this turn");
+                Message message = new Message(MessageTags.ZDEN, robot.location, robot.ID);
+                message.send(rc, distToNearestArchon);
+//                rc.setIndicatorString(2, "I transmitted denLocation this turn");
             }
         }
-    }
-
-    // Given a direction, try to move that way, but avoid taking damage or going
-    // far into enemy LOF.
-    // General Scout exploration driver.
-    // Don't let scout get stuck in concave areas, or near swarms of allies.
-    public static void pathDirectionAvoidEnemies(Direction dir) {
-
     }
 
     public static void tick() throws GameActionException {
@@ -231,14 +223,7 @@ public class ScoutPlayer extends RobotPlayer {
         } else if (didJustBroadcast) {
             didJustBroadcast = false;
         }
-        // Wander out into the wilderness
-        // find anything of interest
-        // report back to archons when we have enough data
-        // Give report, follow squad that gets deployed
-        // Constantly broadcast to squad attack info
-        // Signal troops to retreat when attack is done, or failed, or
-        // when reinforcements are needed,
-        // or when zombie spawn is upcoming
+
         Exploration.tryExplore();
         
         // If we have found every bound
