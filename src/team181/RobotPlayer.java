@@ -4,6 +4,7 @@ import battlecode.common.*;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
+import team181.RobotPlayer.messageConstants;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -35,10 +36,20 @@ public class RobotPlayer {
     static Team myTeam;
     static Team enemyTeam;
     static RobotType myRobotType;
+    /**
+     * Nearest ally archon
+     */
     static MapLocation nearestArchon;
-    static RobotInfo[] allyArchons = new RobotInfo[GameConstants.NUMBER_OF_ARCHONS_MAX];
-    static RobotInfo[] enemyArchons = new RobotInfo[GameConstants.NUMBER_OF_ARCHONS_MAX];
-    
+    /**
+     * Nearest enemy archon
+     */
+    static MapLocation nearestEnemyArchon;
+    /**
+     * Nearest last known location of an enemy
+     */
+    static MapLocation nearestEnemyLocation;
+    static MapLocation tempLoc;
+
     /**
      * Copy of signal queue
      */
@@ -64,9 +75,17 @@ public class RobotPlayer {
     static class messageConstants {
 
         /**
-         *  Nearest Archon Location
+         *  Nearest Ally Archon Location
          */
-        public final static int NEAL = 55555;
+        public final static int NAAL = 55555;
+        /**
+         * Enemy Archon Location.x
+         */
+        public final static int EALX = 55565;
+        /**
+         * Enemy Archon Location.y
+         */
+        public final static int EALY = 55655;
 
         /**
          *  Scout Map Bounds North
@@ -129,10 +148,19 @@ public class RobotPlayer {
             if (nearbyEnemies.length > 0) {
                 pathToLocation(Util.closestRobot(myLocation, nearbyEnemies).location);
             } else {
+                moveToClosestEnemyArchon();
+            }
+        }
+
+        public static void moveToClosestEnemyArchon() throws GameActionException {
+            if (nearestEnemyArchon != null) {
+                pathToLocation(nearestEnemyArchon);
+            } else {
                 randomMove();
             }
         }
 
+        
         public static void moveToClosestTraitor() throws GameActionException {
             if (nearbyTraitors.length > 0) {
                 pathToLocation(Util.closestRobot(myLocation, nearbyTraitors).location);
@@ -227,13 +255,28 @@ public class RobotPlayer {
                     }
 
                     MapLocation loc = signal.getLocation();
-                    rc.setIndicatorString(1, "Message Recieved was: " + Integer.toString(signal.getMessage()[0]) + " "
-                            + Integer.toString(signal.getMessage()[1]));
+                    int msg1 = signal.getMessage()[0];
+                    int msg2 = signal.getMessage()[1];
+                    int id = signal.getID();
+                    
+                    rc.setIndicatorString(1, "Message Recieved was: " + Integer.toString(msg1) + " "
+                            + Integer.toString(msg2));
                     // Set the nearest archon location if appropriate message
-                    // was recieved.
-                    if (signal.getMessage()[0] == messageConstants.NEAL) {
-                        nearestArchon = loc;
+                    // was received.
+                    switch (msg1) {
+                        case (messageConstants.NAAL) :
+                                nearestArchon = loc;
+                            break;
+                            // Handle reporting of enemy archon locations
+                        case messageConstants.EALX:
+                            tempLoc = new MapLocation(msg2, loc.y);
+                            break;
+                        case messageConstants.EALY:
+                            nearestEnemyArchon = new MapLocation(tempLoc.x, msg2);
+//                            System.out.println("received enemy archon location: "+nearestEnemyArchon.toString());
+                            break;
                     }
+
                 }
             }
         }
@@ -260,6 +303,20 @@ public class RobotPlayer {
             attackableTraitors = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, enemyTeam);
             attackableZombies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, Team.ZOMBIE);
 //            attackableEnemies = Util.joinRobotInfo(attackableTraitors, attackableZombies);
+            if (nearbyEnemies.length > 0) {
+                // Update nearest enemy location
+                int bestDist = myRobotType.sensorRadiusSquared + 1;
+                if (nearestEnemyLocation != null) {
+                    bestDist = myLocation.distanceSquaredTo(nearestEnemyLocation);
+                }
+                for (RobotInfo robot : nearbyEnemies) {
+                    int dist = myLocation.distanceSquaredTo(robot.location);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        nearestEnemyLocation = robot.location;
+                    }
+                }
+            }
             // Nearest archon
             if (!myRobotType.equals(RobotType.ARCHON) && nearbyAllies.length > 0) {
                 // check for nearest archon
@@ -356,7 +413,12 @@ public class RobotPlayer {
             try {
                 Debug.emptyIndicatorStrings();
                 Sensing.updateNearbyEnemies();
-                
+                if (nearestEnemyArchon != null) {
+                    rc.setIndicatorString(3, "Enemy Archon @ "+nearestEnemyArchon.toString());
+                    System.out.println("Enemy archon @ "+nearestEnemyArchon.toString());
+                } else {
+                    System.out.println("Unknown enemy archon location");
+                }
                 switch (myRobotType) {
                     case ARCHON:
                         ArchonPlayer.tick();

@@ -7,6 +7,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
+import battlecode.common.Team;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.messageConstants;
 
@@ -16,7 +17,8 @@ import java.util.HashMap;
 
 public class ArchonPlayer extends RobotPlayer {
 
-    static RobotType[] unitsToBuild = { RobotType.GUARD, RobotType.SOLDIER, /*RobotType.VIPER*/ };
+    static RobotType[] unitsToBuild = { RobotType.GUARD,
+            RobotType.SOLDIER, /* RobotType.VIPER */ };
     static int nextUnitToBuild = rand.nextInt(unitsToBuild.length);
     static boolean builtLastUnit = false;
 
@@ -25,7 +27,7 @@ public class ArchonPlayer extends RobotPlayer {
     static Map<Integer, Boolean> waitingMessageID;
     // What was the last message the scout sent?
     static Map<Integer, Integer> lastTransmissionID;
-
+    
     static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();
 
     static class ArchonMessaging {
@@ -79,7 +81,7 @@ public class ArchonPlayer extends RobotPlayer {
                         msg2 = Messaging.adjustBound(msg2);
                         storeDenLocation(msg2, id, messageConstants.DENY);
                         break;
-
+                        
                     }
 
                 }
@@ -144,6 +146,10 @@ public class ArchonPlayer extends RobotPlayer {
                 if (rc.hasBuildRequirements(typeToBuild)) {
                     rc.setIndicatorString(1, "Building: " + typeToBuild.toString());
                     Direction dirToBuild = directions[rand.nextInt(8)];
+                    // Build in the same direction as your enemies
+                    if (nearbyEnemies.length > 0) {
+                        dirToBuild = myLocation.directionTo(nearbyEnemies[0].location);
+                    }
                     for (int i = 0; i < 8; i++) {
                         // If possible, build in this direction
                         if (rc.canBuild(dirToBuild, typeToBuild)) {
@@ -152,7 +158,13 @@ public class ArchonPlayer extends RobotPlayer {
                             // save it.
                             // Just a note that broadcasting increases core
                             // delay, try to minimize it!
-                            rc.broadcastMessageSignal(messageConstants.NEAL, (int) 'A', broadcastDistance);
+                            rc.broadcastMessageSignal(messageConstants.NAAL, (int) 'A', broadcastDistance);
+                            if (nearestEnemyArchon != null) {
+                                // Broadcast where enemy archon is
+                                rc.broadcastMessageSignal(messageConstants.EALX, nearestEnemyArchon.x, broadcastDistance);
+                                rc.broadcastMessageSignal(messageConstants.EALY, nearestEnemyArchon.y, broadcastDistance);
+//                                System.out.println("Broadcasting enemy archon: "+nearestEnemyArchon.toString());
+                            }
                             // If it is a scout, tell it the new bounds that we
                             // already know
                             if (typeToBuild == RobotType.SCOUT && allBoundsSet) {
@@ -185,21 +197,28 @@ public class ArchonPlayer extends RobotPlayer {
     }
 
     public static void tick() throws GameActionException {
-
+        ArchonMessaging.handleMessageQueue();
+        
         rc.setIndicatorString(2, "All bounds known?: " + " " + Boolean.toString(allBoundsSet)
                 + Integer.toString(northBound) + "was nb and eb is: " + Integer.toString(eastBound));
         rc.setIndicatorString(2, "Number of known dens: " + Integer.toString(knownDens.size()));
+        if (nearestEnemyArchon != null) {
+            rc.setIndicatorString(2, "Enemy Archon location: " + nearestEnemyArchon);
+        } else {
+            System.out.println("unknown enemy archon location");
+        }
         if (!knownDens.isEmpty()) {
             int fate = rand.nextInt(knownDens.size());
             rc.setIndicatorString(2, "Den: " + Integer.toString(fate + 1) + " " + knownDens.get(fate).toString());
         }
 
         // Priorities
-        // #1. Building
+        // Building
         if (Building.tryBuildUnit(nextRobotTypeToBuild())) {
             return;
-        };
-        // #2. Survival
+        }
+        
+        // Survival
         if (shouldFlee()) {
             if (rc.isCoreReady()) {
                 Direction dirToMove = Direction.NONE;
@@ -212,23 +231,53 @@ public class ArchonPlayer extends RobotPlayer {
                 Direction bestDir = leastRiskyDirection(dirToMove);
                 if (!bestDir.equals(Direction.NONE)) {
                     rc.move(bestDir);
+                    return;
                 }
             }
         }
-        // #3. Repairing
-        repairAllies(nearbyAllies);
-        // #4. Pick up Parts
-        retrieveParts();
+        // Activating Neutrals
+        RobotInfo[] neutralRobots = rc.senseNearbyRobots(-1, Team.NEUTRAL);
+        if (neutralRobots.length > 0) {
+            if (activateNeutrals(neutralRobots)) {
+                return;
+            }
+        }
+
+        // Repairing
+        if (repairAllies(nearbyAllies)) {
+            return;
+        }
+        // Pick up Parts
+        if (retrieveParts()) {
+            return;
+        }
+
+        if (neutralRobots.length > 0 && rc.isCoreReady()) {
+            // Move to closest
+            RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
+            MapLocation loc = neutralRobot.location;
+            Direction dirToMove = myLocation.directionTo(loc);
+            Direction bestDir = leastRiskyDirection(dirToMove);
+            if (!bestDir.equals(Direction.NONE)) {
+                rc.move(bestDir);
+                rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
+                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);;
+                return;
+            }
+        }
+
+        // Move randomly!
+        //Movement.randomMove();
 
     }
-    
+
     /**
      * Determine what robot to build next
      * 
      * @return The type of robot to build next
      */
     static RobotType nextRobotTypeToBuild() {
-        
+
         // Build Scouts at the start
         if (Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < attackableZombies.length) {
             return RobotType.GUARD;
@@ -248,28 +297,14 @@ public class ArchonPlayer extends RobotPlayer {
                 // units.
                 nextUnitToBuild = rand.nextInt(unitsToBuild.length);
                 builtLastUnit = false;
-//                System.out.println("NEXT UNIT");
+                // System.out.println("NEXT UNIT");
             }
             return unitsToBuild[nextUnitToBuild];
         }
 
     }
-    
-//    public static boolean shouldFlee() {
-//        // Archons should always flee if any attacking units are around
-//        int len = nearbyEnemies.length;
-//        if (len == 0) {
-//            return false;
-//        }
-//        for (int i=0; i<len; i++) {
-//            if (nearbyEnemies[i].attackPower > 0) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-    
-    public static void retrieveParts() throws GameActionException {
+
+    public static boolean retrieveParts() throws GameActionException {
         if (rc.isCoreReady()) {
             // Find all part locations
             MapLocation[] partLocations = rc.sensePartLocations(-1);
@@ -280,30 +315,46 @@ public class ArchonPlayer extends RobotPlayer {
                 Direction bestDir = leastRiskyDirection(dirToMove);
                 if (!bestDir.equals(Direction.NONE)) {
                     rc.move(bestDir);
+                    return true;
                 }
             }
         }
+        return false;
     }
-    
+
+    public static boolean activateNeutrals(RobotInfo[] neutralRobots) throws GameActionException {
+        if (rc.isCoreReady()) {
+            // Find all neutral locations
+            for (RobotInfo neutralRobot : neutralRobots) {
+                // Any adjacent?
+                if (myLocation.isAdjacentTo(neutralRobot.location)) {
+                    rc.activate(neutralRobot.location);
+                    rc.setIndicatorString(1, "Activating robot: " + Integer.toString(neutralRobot.ID));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static MapLocation bestLocationForParts(MapLocation[] partLocations) {
         MapLocation bestLoc = partLocations[0];
         int bestDist = myLocation.distanceSquaredTo(bestLoc);
         double bestVal = rc.senseParts(bestLoc);
         int len = partLocations.length;
-        for (int i=1; i<len; i++) {
+        for (int i = 1; i < len; i++) {
             MapLocation loc = partLocations[i];
             double val = rc.senseParts(loc);
             int dist = myLocation.distanceSquaredTo(loc);
             if (
-                    // Optimize for value
-                    //(val > bestVal) || // Best value
-                    //(val == bestVal && bestDist > dist)
-                    
-                    // Optimize for distance
-                    (bestDist > dist) ||
-                    (bestDist == dist && val > bestVal)
-                    
-                    ) {
+            // Optimize for value
+            // (val > bestVal) || // Best value
+            // (val == bestVal && bestDist > dist)
+
+            // Optimize for distance
+            (bestDist > dist) || (bestDist == dist && val > bestVal)
+
+            ) {
                 bestVal = val;
                 bestLoc = loc;
                 bestDist = dist;
@@ -311,15 +362,15 @@ public class ArchonPlayer extends RobotPlayer {
         }
         return bestLoc;
     }
-    
+
     /**
      * Repair nearby allies
      * 
      * @param allies
-     * @throws GameActionException 
+     * @return 
+     * @throws GameActionException
      */
-    static void repairAllies(RobotInfo[] allies) throws GameActionException {
-        
+    static boolean repairAllies(RobotInfo[] allies) throws GameActionException {
         for (RobotInfo robot : nearbyAllies) {
             if (robot.health < robot.maxHealth && robot.type != RobotType.ARCHON) {
                 rc.setIndicatorDot(robot.location, 80, 255, 80);
@@ -328,10 +379,10 @@ public class ArchonPlayer extends RobotPlayer {
                 // it, then break.
                 if (robot.location.distanceSquaredTo(rc.getLocation()) <= myAttackRange) {
                     rc.repair(robot.location);
-                    return;
+                    return true;
                 }
             }
         }
-
+        return false;
     }
 }

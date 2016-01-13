@@ -203,6 +203,22 @@ public class ScoutPlayer extends RobotPlayer {
 
     public static void tick() throws GameActionException {
         ScoutMessaging.handleMessageQueue();
+        
+        if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0) {
+            for (RobotInfo r : nearbyEnemies) {
+                if (r.type.equals(RobotType.ARCHON)) {
+                    int distToNearestArchon = 10000; //nearestArchon.distanceSquaredTo(rc.getLocation());
+                    rc.broadcastMessageSignal(messageConstants.EALX, r.location.x,
+                            distToNearestArchon);
+                    rc.broadcastMessageSignal(messageConstants.EALY, r.location.y,
+                            distToNearestArchon);
+                    rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: "+r.location.toString());
+                    System.out.println("I transmitted Enemy Archon Location this turn: "+r.location.toString());
+                    break;
+                }
+            }
+        }
+        
         // If we have found every bound
         if (numExploredDirections == 4 || allBoundsSet == true) {
             reportDens();

@@ -30,7 +30,8 @@ public class TurretPlayer extends RobotPlayer {
                     rc.setIndicatorString(2, "Attacking Zombie at " + zombie.location.toString());
                     return;
                 }
-
+            } else {
+                rc.setIndicatorString(2, "Nothing to attack");
             }
         } else {
             rc.setIndicatorString(2, "Weapon not ready");

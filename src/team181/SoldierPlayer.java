@@ -11,7 +11,7 @@ import team181.RobotPlayer.Sensing;
 
 public class SoldierPlayer extends RobotPlayer {
 
-    static double retreatHealthPercent = 0.4;
+    static double retreatHealthPercent = 0.0;
     static int idealAllyDist = 4;
     
     public static void tick() throws GameActionException {
@@ -38,8 +38,10 @@ public class SoldierPlayer extends RobotPlayer {
                 rc.setIndicatorString(0, "Attacking Zombies");
             } else {
                 // Enemies in sight, outside of attacking range
-                Movement.moveToClosestEnemy();
-                rc.setIndicatorString(0, "Moving towards closest enemy");
+//                Movement.moveToClosestEnemy();
+//                rc.setIndicatorString(0, "Moving towards closest enemy");
+                Movement.moveToClosestEnemyArchon();
+                rc.setIndicatorString(0, "Moving towards closest enemy archon");
             }
         } else {
             // no enemies in sight
@@ -53,6 +55,10 @@ public class SoldierPlayer extends RobotPlayer {
                     rc.setIndicatorString(0, "Moving towards closest ally");
                     return;
                 }
+            } else if (nearestEnemyArchon != null) {
+                Movement.moveToClosestEnemyArchon();
+                rc.setIndicatorString(0, "Moving towards closest enemy archon");
+                return;
             }
             Movement.randomMove();
             rc.setIndicatorString(0, "Moving randomly");
