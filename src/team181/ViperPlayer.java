@@ -2,7 +2,7 @@ package team181;
 
 import battlecode.common.Clock;
 
-public class ViperPlayer extends RobotPlayer {
+public class ViperPlayer extends SoldierPlayer {
 
     public static void move() {
 

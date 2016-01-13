@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class ArchonPlayer extends RobotPlayer {
 
-    static RobotType[] unitsToBuild = { RobotType.GUARD, RobotType.SOLDIER, RobotType.VIPER };
+    static RobotType[] unitsToBuild = { RobotType.GUARD, RobotType.SOLDIER, /*RobotType.VIPER*/ };
     static int nextUnitToBuild = rand.nextInt(unitsToBuild.length);
     static boolean builtLastUnit = false;
 
@@ -37,6 +37,11 @@ public class ArchonPlayer extends RobotPlayer {
             // problems.
             if (currentSignals.length > 0) {
                 for (Signal signal : currentSignals) {
+                    // Make sure this is our team's message
+                    if (signal.getTeam() != rc.getTeam()) {
+                        continue;
+                    }
+
                     MapLocation loc = signal.getLocation();
                     int msg1 = signal.getMessage()[0];
                     int msg2 = signal.getMessage()[1];
@@ -212,6 +217,8 @@ public class ArchonPlayer extends RobotPlayer {
         }
         // #3. Repairing
         repairAllies(nearbyAllies);
+        // #4. Pick up Parts
+        retrieveParts();
 
     }
     
@@ -223,12 +230,12 @@ public class ArchonPlayer extends RobotPlayer {
     static RobotType nextRobotTypeToBuild() {
         
         // Build Scouts at the start
-        if (rc.getRoundNum() < 80
+        if (Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < attackableZombies.length) {
+            return RobotType.GUARD;
+        } else if (rc.getRoundNum() < 80
                 || (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 3)) {
             return RobotType.TURRET;
         } else if (rc.getRoundNum() > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 1) {
-            return RobotType.GUARD;
-        } else if (Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < attackableZombies.length) {
             return RobotType.GUARD;
         } else if (rc.getRoundNum() < 120) {
             return RobotType.SCOUT;
@@ -248,11 +255,62 @@ public class ArchonPlayer extends RobotPlayer {
 
     }
     
-    public static boolean shouldFlee() {
-        // Archons should always flee
-        return nearbyEnemies.length > 0;
+//    public static boolean shouldFlee() {
+//        // Archons should always flee if any attacking units are around
+//        int len = nearbyEnemies.length;
+//        if (len == 0) {
+//            return false;
+//        }
+//        for (int i=0; i<len; i++) {
+//            if (nearbyEnemies[i].attackPower > 0) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+    
+    public static void retrieveParts() throws GameActionException {
+        if (rc.isCoreReady()) {
+            // Find all part locations
+            MapLocation[] partLocations = rc.sensePartLocations(-1);
+            if (partLocations.length > 0) {
+                // Determine best part
+                MapLocation loc = bestLocationForParts(partLocations);
+                Direction dirToMove = myLocation.directionTo(loc);
+                Direction bestDir = leastRiskyDirection(dirToMove);
+                if (!bestDir.equals(Direction.NONE)) {
+                    rc.move(bestDir);
+                }
+            }
+        }
     }
     
+    public static MapLocation bestLocationForParts(MapLocation[] partLocations) {
+        MapLocation bestLoc = partLocations[0];
+        int bestDist = myLocation.distanceSquaredTo(bestLoc);
+        double bestVal = rc.senseParts(bestLoc);
+        int len = partLocations.length;
+        for (int i=1; i<len; i++) {
+            MapLocation loc = partLocations[i];
+            double val = rc.senseParts(loc);
+            int dist = myLocation.distanceSquaredTo(loc);
+            if (
+                    // Optimize for value
+                    //(val > bestVal) || // Best value
+                    //(val == bestVal && bestDist > dist)
+                    
+                    // Optimize for distance
+                    (bestDist > dist) ||
+                    (bestDist == dist && val > bestVal)
+                    
+                    ) {
+                bestVal = val;
+                bestLoc = loc;
+                bestDist = dist;
+            }
+        }
+        return bestLoc;
+    }
     
     /**
      * Repair nearby allies
@@ -261,6 +319,7 @@ public class ArchonPlayer extends RobotPlayer {
      * @throws GameActionException 
      */
     static void repairAllies(RobotInfo[] allies) throws GameActionException {
+        
         for (RobotInfo robot : nearbyAllies) {
             if (robot.health < robot.maxHealth && robot.type != RobotType.ARCHON) {
                 rc.setIndicatorDot(robot.location, 80, 255, 80);
@@ -269,7 +328,7 @@ public class ArchonPlayer extends RobotPlayer {
                 // it, then break.
                 if (robot.location.distanceSquaredTo(rc.getLocation()) <= myAttackRange) {
                     rc.repair(robot.location);
-                    break;
+                    return;
                 }
             }
         }

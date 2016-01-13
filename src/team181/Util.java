@@ -78,5 +78,28 @@ public class Util {
         }
     }
     
+    /**
+     * Join two arrays of RobotInfos together
+     * @param robotsA
+     * @param robotsB
+     * @return Combined arrays of RobotInfos
+     */
+    public static RobotInfo[] joinRobotInfo(RobotInfo[] robotsA, RobotInfo[] robotsB) {
+        RobotInfo[] all = new RobotInfo[robotsA.length + robotsB.length];
+        int index = 0;
+        int len = robotsA.length;
+        for (int i=0; i<len; i++) {
+            all[index] = robotsA[i];
+            index++;
+        }
+        len = robotsB.length;
+        for (int i=0; i<len; i++) {
+            all[index] = robotsB[i];
+            index++;
+        }
+        return all;
+    }
+
+    
     
 }

@@ -51,30 +51,6 @@ public class ScoutPlayer extends RobotPlayer {
             }
         }
 
-        // Given a direction, try to move that way, but avoid taking damage or
-        // going far into enemy LOF.
-        // General Scout exploration driver.
-        // Don't let scout get stuck in concave areas, or near swarms of allies.
-        public static void explore(Direction dirToMove) throws GameActionException {
-            if (rc.isCoreReady()) {
-                if (nearbyEnemies.length == 0) {
-                    // There are no known enemy threats
-                    if (rc.canMove(dirToMove)) {
-                        rc.move(dirToMove);
-                    } else if (rc.canMove(dirToMove.rotateLeft())) {
-                        rc.move(dirToMove.rotateLeft());
-                    } else if (rc.canMove(dirToMove.rotateRight())) {
-                        rc.move(dirToMove.rotateRight());
-                    }
-                } else {
-                    Direction bestDir = leastRiskyDirection(dirToMove);
-                    if (!bestDir.equals(Direction.NONE)) {
-                        rc.move(bestDir);
-                    }
-                }
-            }
-        }
-
         // Tells us if a point in a given cardinal direction at our maximum
         // sight
         // range is on the map
@@ -136,6 +112,7 @@ public class ScoutPlayer extends RobotPlayer {
                 broadcastMapBounds();
             } else {
                 explore(Movement.randomDirection());
+//                explore(myLocation.directionTo(nearestArchon).opposite());
             }
         }
     }

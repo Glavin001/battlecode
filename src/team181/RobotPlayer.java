@@ -29,12 +29,16 @@ public class RobotPlayer {
     static RobotInfo[] veryCloseAllies;
     static RobotInfo[] attackableZombies;
     static RobotInfo[] attackableTraitors;
+//    static RobotInfo[] attackableEnemies;
     static Random rand;
     static int myAttackRange;
     static Team myTeam;
     static Team enemyTeam;
     static RobotType myRobotType;
     static MapLocation nearestArchon;
+    static RobotInfo[] allyArchons = new RobotInfo[GameConstants.NUMBER_OF_ARCHONS_MAX];
+    static RobotInfo[] enemyArchons = new RobotInfo[GameConstants.NUMBER_OF_ARCHONS_MAX];
+    
     /**
      * Copy of signal queue
      */
@@ -136,6 +140,15 @@ public class RobotPlayer {
                 randomMove();
             }
         }
+        
+        public static void moveToClosestAlly() throws GameActionException {
+            if (nearbyAllies.length > 0) {
+                pathToLocation(Util.closestRobot(myLocation, nearbyAllies).location);
+            } else {
+                randomMove();
+            }
+        }
+
 
         // Make newly created units stay within some default range of the
         // nearest archon.
@@ -175,19 +188,19 @@ public class RobotPlayer {
                 if (team == null) {
                     // Prioritize attacking enemy units
                     if (attackableTraitors.length > 0) {
-                        rc.attackLocation(attackableTraitors[0].location);
+                        rc.attackLocation(bestRobotToAttack(attackableTraitors).location);
                     } else if (attackableZombies.length > 0) {
-                        rc.attackLocation(attackableZombies[0].location);
+                        rc.attackLocation(bestRobotToAttack(attackableZombies).location);
                     }
                     // Attack first zombie in list
                 } else if (team == Team.ZOMBIE) {
                     if (attackableZombies.length > 0) {
-                        rc.attackLocation(attackableZombies[0].location);
+                        rc.attackLocation(bestRobotToAttack(attackableZombies).location);
                     }
                     // Attack first enemy on other team
                 } else if (team == enemyTeam) {
                     if (attackableTraitors.length > 0) {
-                        rc.attackLocation(attackableTraitors[0].location);
+                        rc.attackLocation(bestRobotToAttack(attackableTraitors).location);
                     }
                 }
             }
@@ -208,6 +221,11 @@ public class RobotPlayer {
             if (currentSignals.length > 0) {
                 // rc.setIndicatorString(0, "I received a signal this turn!");
                 for (Signal signal : currentSignals) {
+                    // Make sure signal is from our team
+                    if (signal.getTeam() != rc.getTeam()) {
+                        continue;
+                    }
+
                     MapLocation loc = signal.getLocation();
                     rc.setIndicatorString(1, "Message Recieved was: " + Integer.toString(signal.getMessage()[0]) + " "
                             + Integer.toString(signal.getMessage()[1]));
@@ -241,6 +259,19 @@ public class RobotPlayer {
             veryCloseAllies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, myTeam);
             attackableTraitors = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, enemyTeam);
             attackableZombies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, Team.ZOMBIE);
+//            attackableEnemies = Util.joinRobotInfo(attackableTraitors, attackableZombies);
+            // Nearest archon
+            if (!myRobotType.equals(RobotType.ARCHON) && nearbyAllies.length > 0) {
+                // check for nearest archon
+                int bestDist = myRobotType.sensorRadiusSquared + 1;
+                for (RobotInfo r : nearbyAllies) {
+                    int dist = myLocation.distanceSquaredTo(r.location);
+                    if (r.type.equals(RobotType.ARCHON) && dist < bestDist) {
+                        bestDist = dist;
+                        nearestArchon = r.location;
+                    }
+                }
+            }
         }
     }
 
@@ -417,7 +448,7 @@ public class RobotPlayer {
      * @return Total Score for single robot
      */
     private static double scoreRobot(RobotInfo robot) {
-        return robot.attackPower + robot.health;
+        return (robot.attackPower + robot.health) / (robot.weaponDelay + 1.0);
     }
 
     /*
@@ -432,7 +463,9 @@ public class RobotPlayer {
     public static double attackRisk(MapLocation loc) {
         if (nearbyEnemies.length > 0) {
             double totalRisk = 0.0;
-            for (RobotInfo r : nearbyEnemies) {
+            int len = nearbyEnemies.length;
+            for (int i=0; i<len; i++) {
+                RobotInfo r = nearbyEnemies[i];
                 MapLocation enemyLoc = r.location;
                 RobotType enemyType = r.type;
                 int distAway = loc.distanceSquaredTo(enemyLoc);
@@ -446,14 +479,14 @@ public class RobotPlayer {
                     // If enemy has 0 attack power then risk = 0
                     // If Core delay is 0 then risk = numerator, and will be
                     // divided by each turn/core delay
-                    double risk = ((safeDist - distAway) * r.attackPower) / (r.weaponDelay + 1.0);
+                    double risk = (safeDist - distAway) * scoreRobot(r);
                     totalRisk += risk;
                 }
             }
             // rc.setIndicatorString(2, "Risk this turn is: " +
             // Double.toString(totalRisk));
-            System.out.println(
-                    "The total risk for possible location " + loc.toString() + " was: " + Double.toString(totalRisk));
+//            System.out.println(
+//                    "The total risk for possible location " + loc.toString() + " was: " + Double.toString(totalRisk));
             return totalRisk;
         } else {
             return 0.0;
@@ -462,12 +495,47 @@ public class RobotPlayer {
     
     /**
      * Compare robots and determine the best one to attack
+     * 
      * @param robots
-     * @return Robot you should attack
+     * @return Robot you should attack. Will return null if there are no robots given.
      */
     public static RobotInfo bestRobotToAttack(RobotInfo[] robots) {
-        // TODO: make this better
-        return Util.closestRobot(myLocation, robots);
+        if (robots.length > 0) {
+            RobotInfo bestRobot = robots[0];
+            double bestRank = rankRobotAttackPriority(bestRobot);
+            int len = robots.length;
+            for (int i=1; i<len; i++) {
+                RobotInfo robot = robots[i];
+                double rank = rankRobotAttackPriority(robot);
+                if (rank > bestRank) {
+                    bestRobot = robot;
+                    bestRank = rank;
+                }
+            }
+            return bestRobot;
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * 
+     * @param robot
+     * @return
+     */
+    public static double rankRobotAttackPriority(RobotInfo robot) {
+        // Priorities
+        // #1. Archons
+        // #2. Their Health <= My Attack Power
+        // #3. 
+        if (robot.type.equals(RobotType.ARCHON)) {
+//            double archonCoef = 1000.0;
+            // Distance to the archon
+            // Find the closest archon!
+            return rc.getType().sensorRadiusSquared / myLocation.distanceSquaredTo(robot.location);
+        }
+        // Weakest
+        return -scoreRobot(robot);
     }
     
     /**
@@ -494,7 +562,9 @@ public class RobotPlayer {
                 MapLocation nextLoc = myLocation.add(currDir);
                 double risk = attackRisk(nextLoc);
                 risks[i] = risk;
-                rc.setIndicatorDot(nextLoc, (int) Math.min(255, risk), 0, 0);
+                if (risk != 0.0) {
+                    rc.setIndicatorDot(nextLoc, (int) Math.min(255, risk), 0, 0);
+                }
                 // System.out.println("At location" +
                 // currLoc.toString() + " risk in direction " +
                 // currDir.toString() + " is: " +
@@ -524,5 +594,35 @@ public class RobotPlayer {
         rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
         return leastRiskyDirection;
     }
+    
+    
+    /**
+     *      Given a direction, try to move that way, but avoid taking damage or
+     *      going far into enemy LOF.
+     *      General Scout exploration driver.
+     *      Don't let scout get stuck in concave areas, or near swarms of allies.
+     * @param dirToMove
+     * @throws GameActionException
+     */
+     public static void explore(Direction dirToMove) throws GameActionException {
+        if (rc.isCoreReady()) {
+            if (nearbyEnemies.length == 0) {
+                // There are no known enemy threats
+                if (rc.canMove(dirToMove)) {
+                    rc.move(dirToMove);
+                } else if (rc.canMove(dirToMove.rotateLeft())) {
+                    rc.move(dirToMove.rotateLeft());
+                } else if (rc.canMove(dirToMove.rotateRight())) {
+                    rc.move(dirToMove.rotateRight());
+                }
+            } else {
+                Direction bestDir = leastRiskyDirection(dirToMove);
+                if (!bestDir.equals(Direction.NONE)) {
+                    rc.move(bestDir);
+                }
+            }
+        }
+    }
+
 
 }

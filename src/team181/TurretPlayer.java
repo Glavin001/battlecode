@@ -13,29 +13,28 @@ public class TurretPlayer extends RobotPlayer {
         // and attack one
         if (rc.isWeaponReady()) {
             if (attackableTraitors.length > 0) {
-                for (RobotInfo enemy : attackableTraitors) {
-                    // Check whether the enemy is in a valid attack
-                    // range (turrets have a minimum range)
-                    if (rc.canAttackLocation(enemy.location)) {
-                        rc.attackLocation(enemy.location);
-                        rc.setIndicatorDot(enemy.location, 255, 10, 10);
-                        rc.setIndicatorString(2, "Attacking Enemy at " + enemy.location.toString());
-                        break;
-                    }
+                RobotInfo enemy = bestRobotToAttack(attackableTraitors);
+                // Check whether the enemy is in a valid attack
+                // range (turrets have a minimum range)
+                if (rc.canAttackLocation(enemy.location)) {
+                    rc.attackLocation(enemy.location);
+                    rc.setIndicatorDot(enemy.location, 255, 10, 10);
+                    rc.setIndicatorString(2, "Attacking Enemy at " + enemy.location.toString());
+                    return;
                 }
             } else if (attackableZombies.length > 0) {
-                for (RobotInfo zombie : attackableZombies) {
-                    if (rc.canAttackLocation(zombie.location)) {
-                        rc.attackLocation(zombie.location);
-                        rc.setIndicatorDot(zombie.location, 255, 10, 10);
-                        rc.setIndicatorString(2, "Attacking Zombie at " + zombie.location.toString());
-                        break;
-                    }
+                RobotInfo zombie = bestRobotToAttack(attackableZombies);
+                if (rc.canAttackLocation(zombie.location)) {
+                    rc.attackLocation(zombie.location);
+                    rc.setIndicatorDot(zombie.location, 255, 10, 10);
+                    rc.setIndicatorString(2, "Attacking Zombie at " + zombie.location.toString());
+                    return;
                 }
+
             }
         } else {
             rc.setIndicatorString(2, "Weapon not ready");
         }
     }
-    
+
 }
