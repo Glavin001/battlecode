@@ -181,10 +181,6 @@ public class ArchonPlayer extends RobotPlayer {
 
     public static void tick() throws GameActionException {
 
-        Debug.emptyIndicatorStrings();
-        Sensing.updateNearbyEnemies();
-        ArchonMessaging.handleMessageQueue();
-
         rc.setIndicatorString(2, "All bounds known?: " + " " + Boolean.toString(allBoundsSet)
                 + Integer.toString(northBound) + "was nb and eb is: " + Integer.toString(eastBound));
         rc.setIndicatorString(2, "Number of known dens: " + Integer.toString(knownDens.size()));
@@ -193,9 +189,28 @@ public class ArchonPlayer extends RobotPlayer {
             rc.setIndicatorString(2, "Den: " + Integer.toString(fate + 1) + " " + knownDens.get(fate).toString());
         }
 
-        
-        Building.tryBuildUnit(nextRobotTypeToBuild());
-        
+        // Priorities
+        // #1. Building
+        if (Building.tryBuildUnit(nextRobotTypeToBuild())) {
+            return;
+        };
+        // #2. Survival
+        if (shouldFlee()) {
+            if (rc.isCoreReady()) {
+                Direction dirToMove = Direction.NONE;
+                if (nearbyAllies.length > 0) {
+                    // Get closest ally
+                    MapLocation closestAllyLocation = Util.closestRobot(myLocation, nearbyAllies).location;
+                    // Direction to closest ally
+                    dirToMove = myLocation.directionTo(closestAllyLocation);
+                }
+                Direction bestDir = leastRiskyDirection(dirToMove);
+                if (!bestDir.equals(Direction.NONE)) {
+                    rc.move(bestDir);
+                }
+            }
+        }
+        // #3. Repairing
         repairAllies(nearbyAllies);
 
     }
@@ -231,6 +246,11 @@ public class ArchonPlayer extends RobotPlayer {
             return unitsToBuild[nextUnitToBuild];
         }
 
+    }
+    
+    public static boolean shouldFlee() {
+        // Archons should always flee
+        return nearbyEnemies.length > 0;
     }
     
     

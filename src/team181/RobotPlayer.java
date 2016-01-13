@@ -1,8 +1,11 @@
 package team181;
 
 import battlecode.common.*;
+import team181.RobotPlayer.Debug;
+import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class RobotPlayer {
@@ -13,13 +16,13 @@ public class RobotPlayer {
      **/
     @SuppressWarnings("unused")
 
-    // You can instantiate variables here.
     static RobotController rc;
     static Direction[] directions = { Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
             Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST };
     static RobotType[] robotTypes = { RobotType.SCOUT, RobotType.SOLDIER, RobotType.SOLDIER, RobotType.SOLDIER,
             RobotType.GUARD, RobotType.GUARD, RobotType.VIPER, RobotType.TURRET };
 
+    static MapLocation myLocation;
     static RobotInfo[] nearbyEnemies;
     static RobotInfo[] nearbyTraitors;
     static RobotInfo[] nearbyAllies;
@@ -32,9 +35,13 @@ public class RobotPlayer {
     static Team enemyTeam;
     static RobotType myRobotType;
     static MapLocation nearestArchon;
-    // Copy of signal queue
+    /**
+     * Copy of signal queue
+     */
     static Signal[] currentSignals;
-    // Map bounds
+    /**
+     * Map bounds
+     */
     static int northBound = 0;
     static int eastBound = 0;
     static int southBound = 0;
@@ -46,18 +53,27 @@ public class RobotPlayer {
     static boolean allBoundsSet = false;
     static int maxID = 32000;
 
-    // Message types
+    /**
+     * Message types
+     *
+     */
     static class messageConstants {
 
-        // Nearest Archon Location
+        /**
+         *  Nearest Archon Location
+         */
         public final static int NEAL = 55555;
 
-        // Scout Map Bounds North
+        /**
+         *  Scout Map Bounds North
+         */
         public final static int SMBN = 12345;
         public final static int SMBE = 22345;
         public final static int SMBS = 32345;
         public final static int SMBW = 42345;
-        // Archon Map Bounds North
+        /**
+         *  Archon Map Bounds North
+         */
         public final static int AMBN = 54321;
         public final static int AMBE = 44321;
         public final static int AMBS = 34321;
@@ -68,11 +84,15 @@ public class RobotPlayer {
 
     }
 
+    /**
+     * Movement
+     *
+     */
     static class Movement {
 
         public static Direction randomDirection() {
-          int fate = rand.nextInt(8);
-          return directions[fate % 8];
+            int fate = rand.nextInt(8);
+            return directions[fate % 8];
         }
 
         public static void randomMove() throws GameActionException {
@@ -81,7 +101,7 @@ public class RobotPlayer {
                 Direction dirToMove;
                 for (int i = 0; i < 8; i++) {
                     dirToMove = directions[(fate + i) % 8];
-                    if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+                    if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
                         // Too much rubble, so I should clear it
                         rc.clearRubble(dirToMove);
                         break;
@@ -103,7 +123,7 @@ public class RobotPlayer {
 
         public static void moveToClosestEnemy() throws GameActionException {
             if (nearbyEnemies.length > 0) {
-                pathToLocation(nearbyEnemies[0].location);
+                pathToLocation(Util.closestRobot(myLocation, nearbyEnemies).location);
             } else {
                 randomMove();
             }
@@ -111,7 +131,7 @@ public class RobotPlayer {
 
         public static void moveToClosestTraitor() throws GameActionException {
             if (nearbyTraitors.length > 0) {
-                pathToLocation(nearbyTraitors[0].location);
+                pathToLocation(Util.closestRobot(myLocation, nearbyTraitors).location);
             } else {
                 randomMove();
             }
@@ -127,10 +147,9 @@ public class RobotPlayer {
 
         public static void pathToLocation(MapLocation loc) throws GameActionException {
             if (rc.isCoreReady()) {
-                MapLocation myLoc = rc.getLocation();
-                Direction dirToMove = myLoc.directionTo(loc);
+                Direction dirToMove = myLocation.directionTo(loc);
                 rc.setIndicatorString(0, "Direction to path is: " + dirToMove.toString());
-                if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+                if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
                     // Too much rubble, so I should clear it
                     rc.clearRubble(dirToMove);
                     // Check if I can move in this direction
@@ -215,7 +234,8 @@ public class RobotPlayer {
 
     static class Sensing {
         public static void updateNearbyEnemies() {
-            nearbyEnemies = rc.senseHostileRobots(rc.getLocation(), myRobotType.sensorRadiusSquared);
+            myLocation = rc.getLocation();
+            nearbyEnemies = rc.senseHostileRobots(myLocation, myRobotType.sensorRadiusSquared);
             nearbyTraitors = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, enemyTeam);
             nearbyAllies = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, myTeam);
             veryCloseAllies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, myTeam);
@@ -254,6 +274,11 @@ public class RobotPlayer {
         }
     }
 
+    /**
+     * Let's get this robot started!
+     * 
+     * @param inrc
+     */
     public static void run(RobotController inrc) {
         // You can instantiate variables here.
         rc = inrc;
@@ -265,7 +290,12 @@ public class RobotPlayer {
         myRobotType = rc.getType();
         loop();
     }
-    
+
+    /**
+     * Run loop for the robot. Calls RobotPlayer.tick() for specific RobotPlayer
+     * type.
+     * 
+     */
     public static void loop() {
         switch (myRobotType) {
         case ARCHON:
@@ -293,28 +323,31 @@ public class RobotPlayer {
 
         while (true) {
             try {
+                Debug.emptyIndicatorStrings();
+                Sensing.updateNearbyEnemies();
+                
                 switch (myRobotType) {
-                case ARCHON:
-                    ArchonPlayer.tick();
-                    break;
-                case TURRET:
-                    TurretPlayer.tick();
-                    break;
-                case SOLDIER:
-                    SoldierPlayer.tick();
-                    break;
-                case GUARD:
-                    GuardPlayer.tick();
-                    break;
-                case VIPER:
-                    ViperPlayer.tick();
-                    break;
-                case SCOUT:
-                    ScoutPlayer.tick();
-                    break;
-                default:
-                    System.out.println("Unknown Robot Type");
-                    return;
+                    case ARCHON:
+                        ArchonPlayer.tick();
+                        break;
+                    case TURRET:
+                        TurretPlayer.tick();
+                        break;
+                    case SOLDIER:
+                        SoldierPlayer.tick();
+                        break;
+                    case GUARD:
+                        GuardPlayer.tick();
+                        break;
+                    case VIPER:
+                        ViperPlayer.tick();
+                        break;
+                    case SCOUT:
+                        ScoutPlayer.tick();
+                        break;
+                    default:
+                        System.out.println("Unknown Robot Type");
+                        return;
                 }
                 Clock.yield();
             } catch (Exception e) {
@@ -323,11 +356,173 @@ public class RobotPlayer {
             }
         }
     }
-    
-    public static void initialize() {}
 
+    /**
+     * Initialize the robot
+     */
+    public static void initialize() {
+    }
+
+    /**
+     * Run the robot one turn
+     * 
+     * @throws GameActionException
+     */
     public static void tick() throws GameActionException {
-        System.out.println("SUBCLASS SHOULD IMPLEMENT");
+        System.out.println("Subclasses should implement their own tick method");
+    }
+
+    /**
+     * Determine if robot should flee (fight or flight)
+     * 
+     * @return Whether or not robot should flee
+     */
+    public static boolean shouldFlee() {
+        return shouldFlee(nearbyAllies, nearbyEnemies);
     }
     
+    /**
+     * Determine if robot should flee (fight or flight)
+     * 
+     * @param alliesWithinRange
+     * @param enemysWithinRange
+     * @param zombiesWithinRange
+     * @return Whether or not robot should flee
+     */
+    public static boolean shouldFlee(RobotInfo[] alliesWithinRange, RobotInfo[] enemysWithinRange) {
+        double alliePower = scoreRobots(alliesWithinRange);
+        double enemyPower = scoreRobots(enemysWithinRange);
+        return (alliePower < enemyPower);
+    }
+
+    /**
+     * Calculate the attack potential of an array of Robots
+     * 
+     * @param robots
+     * @return Total attack score for all robots
+     */
+    private static double scoreRobots(RobotInfo[] robots) {
+        double score = 0.0;
+        int len = robots.length;
+        for (int r=0; r<len; r++) {
+            RobotInfo robot = robots[r];
+            score += scoreRobot(robot);
+        }
+        return score;
+    }
+    
+    /**
+     * Calculate the attack potential of a robot
+     * @param robot
+     * @return Total Score for single robot
+     */
+    private static double scoreRobot(RobotInfo robot) {
+        return robot.attackPower + robot.health;
+    }
+
+    /*
+     * Calculation the Attack risk value of moving to this location given the
+     * direction.
+     *
+     * Attack risk is currently the count of the number of enemies which will be
+     * within attack range of this location Ideal attack risk is 0 (no risk of
+     * attack).
+     *
+     */
+    public static double attackRisk(MapLocation loc) {
+        if (nearbyEnemies.length > 0) {
+            double totalRisk = 0.0;
+            for (RobotInfo r : nearbyEnemies) {
+                MapLocation enemyLoc = r.location;
+                RobotType enemyType = r.type;
+                int distAway = loc.distanceSquaredTo(enemyLoc);
+                int offsetBlocks = 2;
+                int offsetSquared = offsetBlocks * offsetBlocks;
+                int safeDist = (enemyType.attackRadiusSquared + offsetSquared);
+                if (enemyType.equals(RobotType.TURRET)) {
+                    safeDist = RobotType.TURRET.sensorRadiusSquared + offsetSquared;
+                }
+                if (distAway <= safeDist) {
+                    // If enemy has 0 attack power then risk = 0
+                    // If Core delay is 0 then risk = numerator, and will be
+                    // divided by each turn/core delay
+                    double risk = ((safeDist - distAway) * r.attackPower) / (r.weaponDelay + 1.0);
+                    totalRisk += risk;
+                }
+            }
+            // rc.setIndicatorString(2, "Risk this turn is: " +
+            // Double.toString(totalRisk));
+            System.out.println(
+                    "The total risk for possible location " + loc.toString() + " was: " + Double.toString(totalRisk));
+            return totalRisk;
+        } else {
+            return 0.0;
+        }
+    }
+    
+    /**
+     * Compare robots and determine the best one to attack
+     * @param robots
+     * @return Robot you should attack
+     */
+    public static RobotInfo bestRobotToAttack(RobotInfo[] robots) {
+        // TODO: make this better
+        return Util.closestRobot(myLocation, robots);
+    }
+    
+    /**
+     * Determine the best direction while considering risk of each direction
+     * 
+     * @param idealDir Ideal direction, if all things equal
+     * @return The best direction
+     */
+    public static Direction leastRiskyDirection(Direction idealDir) {
+        // There are enemies within sight!
+        // Calculate least risking direction to move
+        double leastRisk = Double.MAX_VALUE; // risks[0];
+        Direction leastRiskyDirection = Direction.NONE;
+        Direction[] allDirs = Direction.values();
+        MapLocation goalLoc = myLocation.add(idealDir);
+        MapLocation leastRiskyLoc = goalLoc;
+        double[] risks = new double[allDirs.length];
+        for (int i = 0; i < allDirs.length; i++) {
+            // Check if can move in this direction
+            Direction currDir = allDirs[i];
+            if (rc.canMove(currDir)) {
+                // Can move in this direction
+                // Check attack risk value
+                MapLocation nextLoc = myLocation.add(currDir);
+                double risk = attackRisk(nextLoc);
+                risks[i] = risk;
+                rc.setIndicatorDot(nextLoc, (int) Math.min(255, risk), 0, 0);
+                // System.out.println("At location" +
+                // currLoc.toString() + " risk in direction " +
+                // currDir.toString() + " is: " +
+                // Double.toString(risk));
+                // Is this better?
+                // Bias towards moving the same direction, dirToMove
+                if (currDir.equals(idealDir) && risk <= leastRisk) {
+                    // At least as good
+                    leastRisk = risk;
+                    leastRiskyDirection = idealDir;
+                    leastRiskyLoc = nextLoc;
+                } else if (risk < leastRisk) {
+                    // Better
+                    leastRisk = risk;
+                    leastRiskyDirection = allDirs[i];
+                    leastRiskyLoc = nextLoc;
+                } else if (risk == leastRisk && (goalLoc.distanceSquaredTo(nextLoc) < goalLoc
+                        .distanceSquaredTo(leastRiskyLoc))) {
+                    // Equally as good but closer to the original
+                    // dirToMove direction
+                    leastRisk = risk;
+                    leastRiskyDirection = allDirs[i];
+                    leastRiskyLoc = nextLoc;
+                }
+            }
+        }
+        rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
+        return leastRiskyDirection;
+    }
+
 }

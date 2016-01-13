@@ -9,19 +9,19 @@ import team181.RobotPlayer.Sensing;
 
 public class SoldierPlayer extends RobotPlayer {
 
+    static double retreatHealthPercent = 0.5;
+    
     public static void tick() throws GameActionException {
-        Debug.emptyIndicatorStrings();
-        Sensing.updateNearbyEnemies();
         Messaging.handleMessageQueue();
 
         // If there are more enemies than allies nearby, retreat to the
         // nearest archon.
-        if (attackableTraitors.length + attackableZombies.length > veryCloseAllies.length) {
+        if (shouldFlee()) {
             Movement.retreatToArchon();
         }
 
-        // Retreat if our health is less than 50%
-        if (rc.getHealth() < myRobotType.maxHealth / 2) {
+        // Retreat if our health is less than retreatHealthPercent
+        if (rc.getHealth() < (myRobotType.maxHealth * retreatHealthPercent)) {
             Movement.retreatToArchon();
             rc.setIndicatorString(2, "Retreating to archon @: " + nearestArchon.toString());
         }
@@ -37,6 +37,7 @@ public class SoldierPlayer extends RobotPlayer {
             Movement.moveToClosestEnemy();
             rc.setIndicatorString(0, "Moving");
         }
-
+        
     }
+    
 }

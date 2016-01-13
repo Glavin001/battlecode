@@ -11,7 +11,6 @@ public class TurretPlayer extends RobotPlayer {
     public static void tick() throws GameActionException {
         // If this robot type can attack, check for enemies within range
         // and attack one
-        Sensing.updateNearbyEnemies();
         if (rc.isWeaponReady()) {
             if (attackableTraitors.length > 0) {
                 for (RobotInfo enemy : attackableTraitors) {
@@ -38,4 +37,5 @@ public class TurretPlayer extends RobotPlayer {
             rc.setIndicatorString(2, "Weapon not ready");
         }
     }
+    
 }
