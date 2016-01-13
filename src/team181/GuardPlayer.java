@@ -7,6 +7,10 @@ import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
 
+/**
+ * Guard Player code
+ *
+ */
 public class GuardPlayer extends SoldierPlayer {
     
     static double retreatHealthPercent = 0.2;

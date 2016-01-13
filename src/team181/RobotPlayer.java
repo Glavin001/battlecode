@@ -9,6 +9,10 @@ import team181.RobotPlayer.messageConstants;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Base class for RobotPlayer
+ *
+ */
 public class RobotPlayer {
 
     /**
@@ -366,7 +370,7 @@ public class RobotPlayer {
     /**
      * Let's get this robot started!
      * 
-     * @param inrc
+     * @param inrc RobotController
      */
     public static void run(RobotController inrc) {
         // You can instantiate variables here.
@@ -460,7 +464,7 @@ public class RobotPlayer {
     /**
      * Run the robot one turn
      * 
-     * @throws GameActionException
+     * @throws GameActionException A exception throw from within the game
      */
     public static void tick() throws GameActionException {
         System.out.println("Subclasses should implement their own tick method");
@@ -478,9 +482,8 @@ public class RobotPlayer {
     /**
      * Determine if robot should flee (fight or flight)
      * 
-     * @param alliesWithinRange
-     * @param enemysWithinRange
-     * @param zombiesWithinRange
+     * @param alliesWithinRange Ally robots
+     * @param enemysWithinRange Enemy robots
      * @return Whether or not robot should flee
      */
     public static boolean shouldFlee(RobotInfo[] alliesWithinRange, RobotInfo[] enemysWithinRange) {
@@ -559,7 +562,7 @@ public class RobotPlayer {
     /**
      * Compare robots and determine the best one to attack
      * 
-     * @param robots
+     * @param robots Robots to evaluate
      * @return Robot you should attack. Will return null if there are no robots given.
      */
     public static RobotInfo bestRobotToAttack(RobotInfo[] robots) {
@@ -582,15 +585,16 @@ public class RobotPlayer {
     }
     
     /**
+     * Rank a robot in terms of attack priority
      * 
-     * @param robot
-     * @return
+     * Priorities
+     * #1. Archons
+     * #2. Wearkest Robot
+     * 
+     * @param robot Robot to rank
+     * @return The total robot ranking
      */
     public static double rankRobotAttackPriority(RobotInfo robot) {
-        // Priorities
-        // #1. Archons
-        // #2. Their Health <= My Attack Power
-        // #3. 
         if (robot.type.equals(RobotType.ARCHON)) {
 //            double archonCoef = 1000.0;
             // Distance to the archon
@@ -664,8 +668,9 @@ public class RobotPlayer {
      *      going far into enemy LOF.
      *      General Scout exploration driver.
      *      Don't let scout get stuck in concave areas, or near swarms of allies.
-     * @param dirToMove
-     * @throws GameActionException
+     *      
+     * @param dirToMove The preferred direction to move, if all things equal
+     * @throws GameActionException An exception throw from the game
      */
      public static void explore(Direction dirToMove) throws GameActionException {
         if (rc.isCoreReady()) {

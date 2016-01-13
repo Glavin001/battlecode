@@ -2,14 +2,18 @@ package team181;
 
 import battlecode.common.*;
 
+/**
+ * Helpful Utility methods
+ *
+ */
 public class Util {
 
     /**
      * Count the total number of robots of a given type
      * 
-     * @param robots
-     * @param type
-     * @return
+     * @param robots Robots to check
+     * @param type The desired robot type to count
+     * @return The number of robots that are the desired type
      */
     public static int countRobotsByRobotType(RobotInfo[] robots, RobotType type) {
         if (robots.length == 0) {
@@ -28,8 +32,8 @@ public class Util {
     /**
      * Determine the closest MapLocation to a center location
      * 
-     * @param center
-     * @param locations
+     * @param center Center location to find closest location to
+     * @param locations All locations to check for closest
      * @return Closest location. Will return null if locations is empty.
      */
     public static MapLocation closestMapLocation(MapLocation center, MapLocation[] locations) {
@@ -54,8 +58,8 @@ public class Util {
     /**
      * Determine the closest Robot to a center location
      * 
-     * @param center
-     * @param robots
+     * @param center Center location to find closest location to
+     * @param robots All robots to check
      * @return Closest robot. Will return null if robots is empty.
      */
     public static RobotInfo closestRobot(MapLocation center, RobotInfo[] robots) {
@@ -80,8 +84,8 @@ public class Util {
     
     /**
      * Join two arrays of RobotInfos together
-     * @param robotsA
-     * @param robotsB
+     * @param robotsA First group of robots
+     * @param robotsB Second group of robots
      * @return Combined arrays of RobotInfos
      */
     public static RobotInfo[] joinRobotInfo(RobotInfo[] robotsA, RobotInfo[] robotsB) {

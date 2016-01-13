@@ -195,4 +195,9 @@
   <target name="print-version" description="Print the current battlecode version">
     <java classpathref="classpath.run" fork="yes" classname="battlecode.server.Version"/>
   </target>
+	
+  <target name="javadoc">
+      <javadoc access="public" author="true" classpath="${path.lib}/hamcrest-core.jar:${path.lib}/junit.jar:${path.lib}/scala-compiler.jar:${path.lib}/battlecode-mapeditor.jar:${path.lib}/scala-parser-combinators_2.11.jar:${path.lib}/scala-reflect.jar:${path.lib}/scala-library.jar:${path.lib}/scala-xml_2.11.jar:${path.lib}/battlecode.jar:/battlecode-scaffold/bin" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="team181" source="1.8" sourcepath="${path.test}:${path.src}" splitindex="true" use="true" version="true"/>
+  </target>
+
 </project>

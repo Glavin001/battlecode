@@ -6,6 +6,10 @@ import battlecode.common.RobotInfo;
 import battlecode.common.Team;
 import team181.RobotPlayer.Sensing;
 
+/**
+ * Turret player
+ *
+ */
 public class TurretPlayer extends RobotPlayer {
 
     public static void tick() throws GameActionException {

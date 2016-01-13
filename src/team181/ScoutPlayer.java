@@ -17,6 +17,10 @@ import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
 import team181.RobotPlayer.messageConstants;
 
+/**
+ * Scout player
+ *
+ */
 public class ScoutPlayer extends RobotPlayer {
 
     // Get the maximum number of tiles in one direction away in sensor radius
