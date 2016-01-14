@@ -24,8 +24,8 @@ public class RobotPlayer {
     static RobotController rc;
     static Direction[] directions = { Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
             Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST };
-    static RobotType[] robotTypes = { RobotType.SCOUT, RobotType.SOLDIER, RobotType.SOLDIER, RobotType.SOLDIER,
-            RobotType.GUARD, RobotType.GUARD, RobotType.VIPER, RobotType.TURRET };
+    static RobotType[] robotTypes = RobotType.values(); /* { RobotType.SCOUT, RobotType.SOLDIER, RobotType.SOLDIER, RobotType.SOLDIER,
+            RobotType.GUARD, RobotType.GUARD, RobotType.VIPER, RobotType.TURRET };*/
 
     static MapLocation myLocation;
     static RobotInfo[] nearbyEnemies;
@@ -120,11 +120,13 @@ public class RobotPlayer {
                     } else if (rc.canMove(dirToMove)) {
                         // Move
                         MapLocation newLocation = myLocation.add(dirToMove);
-                        int distance = (newLocation.x - nearestArchon.x) * (newLocation.x - nearestArchon.x) + 
-                                (newLocation.y - nearestArchon.y) * (newLocation.y - nearestArchon.y);
-                        if (distance >= squaredMin && distance <= squaredMax) {
-                            rc.move(dirToMove);
-                            return;
+                        if (nearestArchon != null) {
+                            int distance = (newLocation.x - nearestArchon.x) * (newLocation.x - nearestArchon.x) + 
+                                    (newLocation.y - nearestArchon.y) * (newLocation.y - nearestArchon.y);
+                            if (distance >= squaredMin && distance <= squaredMax) {
+                                rc.move(dirToMove);
+                                return;
+                            }
                         }
                     }
                 }
