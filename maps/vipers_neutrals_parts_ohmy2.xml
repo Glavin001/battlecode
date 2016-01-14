@@ -1,0 +1,171 @@
+<object-stream>
+  <game-map width="30" height="30" origin="421,144" seed="1337" rounds="2000" mapName="vipers_neutrals_parts_ohmy2">
+    <initialRubble>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+    </initialRubble>
+    <initialParts>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+      <double-array>0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0</double-array>
+    </initialParts>
+    <zombieSpawnSchedule/>
+    <initialRobots>
+      <initial-robot originOffsetX="1" originOffsetY="6" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="1" originOffsetY="7" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="1" originOffsetY="22" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="1" originOffsetY="23" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="2" originOffsetY="5" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="2" originOffsetY="6" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="2" originOffsetY="23" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="2" originOffsetY="24" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="3" originOffsetY="4" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="3" originOffsetY="5" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="3" originOffsetY="24" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="3" originOffsetY="25" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="4" originOffsetY="4" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="4" originOffsetY="7" type="ARCHON" team="A"/>
+      <initial-robot originOffsetX="4" originOffsetY="13" type="ARCHON" team="A"/>
+      <initial-robot originOffsetX="4" originOffsetY="21" type="ARCHON" team="A"/>
+      <initial-robot originOffsetX="4" originOffsetY="25" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="9" originOffsetY="10" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="9" originOffsetY="12" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="9" originOffsetY="14" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="9" originOffsetY="15" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="9" originOffsetY="17" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="9" originOffsetY="19" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="11" originOffsetY="10" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="11" originOffsetY="15" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="12" originOffsetY="19" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="13" originOffsetY="11" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="13" originOffsetY="19" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="4" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="14" originOffsetY="5" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="14" originOffsetY="6" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="7" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="8" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="9" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="10" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="11" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="12" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="13" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="14" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="15" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="16" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="17" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="18" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="19" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="20" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="21" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="22" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="23" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="14" originOffsetY="24" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="14" originOffsetY="25" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="4" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="15" originOffsetY="5" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="15" originOffsetY="6" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="7" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="8" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="9" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="10" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="11" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="12" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="13" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="14" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="15" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="16" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="17" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="18" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="19" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="20" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="21" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="22" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="23" type="SOLDIER" team="B"/>
+      <initial-robot originOffsetX="15" originOffsetY="24" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="15" originOffsetY="25" type="SOLDIER" team="A"/>
+      <initial-robot originOffsetX="16" originOffsetY="10" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="16" originOffsetY="18" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="17" originOffsetY="19" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="18" originOffsetY="10" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="18" originOffsetY="15" type="VIPER" team="A"/>
+      <initial-robot originOffsetX="20" originOffsetY="10" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="20" originOffsetY="12" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="20" originOffsetY="14" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="20" originOffsetY="15" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="20" originOffsetY="17" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="20" originOffsetY="19" type="VIPER" team="B"/>
+      <initial-robot originOffsetX="25" originOffsetY="4" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="25" originOffsetY="8" type="ARCHON" team="B"/>
+      <initial-robot originOffsetX="25" originOffsetY="16" type="ARCHON" team="B"/>
+      <initial-robot originOffsetX="25" originOffsetY="22" type="ARCHON" team="B"/>
+      <initial-robot originOffsetX="25" originOffsetY="25" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="26" originOffsetY="4" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="26" originOffsetY="5" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="26" originOffsetY="24" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="26" originOffsetY="25" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="27" originOffsetY="5" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="27" originOffsetY="6" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="27" originOffsetY="23" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="27" originOffsetY="24" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="28" originOffsetY="6" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="28" originOffsetY="7" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="28" originOffsetY="22" type="SOLDIER" team="NEUTRAL"/>
+      <initial-robot originOffsetX="28" originOffsetY="23" type="SOLDIER" team="NEUTRAL"/>
+    </initialRobots>
+  </game-map>
+</object-stream>

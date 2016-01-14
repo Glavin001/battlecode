@@ -12,6 +12,7 @@ hs_err_pid*
 # temporary folders
 lib/
 bin/
+doc/
 
 # unneeded eclipse info
 .metadata/
