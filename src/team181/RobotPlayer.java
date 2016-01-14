@@ -5,6 +5,8 @@ import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -29,11 +31,17 @@ public class RobotPlayer {
     static MapLocation myLocation;
     static RobotInfo[] nearbyEnemies;
     static RobotInfo[] nearbyTraitors;
+    static RobotInfo[] nearbyNeutrals;
     static RobotInfo[] nearbyAllies;
     static RobotInfo[] veryCloseAllies;
     static RobotInfo[] attackableZombies;
     static RobotInfo[] attackableTraitors;
     static RobotInfo[] attackableEnemies;
+    static MapLocation[] nearbyParts;    
+    static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();
+    static ArrayList<MapLocation> knownNeutrals = new ArrayList<MapLocation>();
+    static ArrayList<MapLocation> knownParts = new ArrayList<MapLocation>();
+    static ArrayList<DecayingMapLocation> knownEnemyClusters = new ArrayList<DecayingMapLocation>();
     static Random rand;
     static int myAttackRange;
     static Team myTeam;
@@ -69,7 +77,7 @@ public class RobotPlayer {
     static boolean sbs = false;
     static boolean wbs = false;
     static boolean allBoundsSet = false;
-    static int maxID = 32000;
+    static int maxID = 16383;
 
     /**
      * Movement
@@ -250,6 +258,8 @@ public class RobotPlayer {
     static class Sensing {
         public static void updateNearbyEnemies() {
             myLocation = rc.getLocation();
+            nearbyNeutrals = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, Team.NEUTRAL);
+            nearbyParts = rc.sensePartLocations(myRobotType.sensorRadiusSquared);
             nearbyEnemies = rc.senseHostileRobots(myLocation, myRobotType.sensorRadiusSquared);
             nearbyTraitors = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, enemyTeam);
             nearbyAllies = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, myTeam);
