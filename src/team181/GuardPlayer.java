@@ -28,6 +28,8 @@ public class GuardPlayer extends SoldierPlayer {
 
         // This is redundant checking...
         if (nearbyEnemies.length > 0) {
+            // Can see enemies
+            // Any to attack?
             if (attackableTraitors.length > 0) {
                 Offensive.attack(enemyTeam);
                 rc.setIndicatorString(0, "Attacking Traitors");
@@ -35,12 +37,15 @@ public class GuardPlayer extends SoldierPlayer {
                 Offensive.attack(Team.ZOMBIE);
                 rc.setIndicatorString(0, "Attacking Zombies");
             } else {
-                Movement.randomMoveAroundArcon(MIN_DISTANCE_FROM_ARCON, MAX_DISTANCE_FROM_ARCON);
-                rc.setIndicatorString(0, "Moving randomly");
+                // No enemies that are attackable, yet
+                // Find best to attack
+                Movement.moveToClosestEnemy();
+//                Movement.randomMoveAroundArcon(MIN_DISTANCE_FROM_ARCON, MAX_DISTANCE_FROM_ARCON);
+                rc.setIndicatorString(0, "Move to closest enemy");
             }
         } else {
             Movement.randomMoveAroundArcon(MIN_DISTANCE_FROM_ARCON, MAX_DISTANCE_FROM_ARCON);
-            rc.setIndicatorString(0, "Moving randomly");
+            rc.setIndicatorString(0, "Moving randomly around nearest archon");
         }
     }
     
