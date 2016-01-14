@@ -481,6 +481,18 @@ public class RobotPlayer {
             int len = nearbyEnemies.length;
             for (int i=0; i<len; i++) {
                 RobotInfo r = nearbyEnemies[i];
+                // Ignore Neutral robots
+                if (r.team.equals(Team.NEUTRAL)) {
+                    break;
+                }
+                // Ignore Archons
+                if (r.type.equals(RobotType.ARCHON)) {
+                    break;
+                }
+                // Ignore TTM
+                if (r.type.equals(RobotType.TTM)) {
+                    break;
+                }
                 MapLocation enemyLoc = r.location;
                 RobotType enemyType = r.type;
                 int distAway = loc.distanceSquaredTo(enemyLoc);
