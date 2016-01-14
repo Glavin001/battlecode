@@ -70,15 +70,17 @@ public class SoldierPlayer extends RobotPlayer {
         
     }
     
-    public static void retreatToArchon() throws GameActionException {
+    public static boolean retreatToArchon() throws GameActionException {
         if (nearestArchon != null && myLocation.distanceSquaredTo(nearestArchon) <= RobotType.ARCHON.attackRadiusSquared) {
             // Enemies in sight, outside of attacking range
-            Movement.moveToClosestEnemy();
             rc.setIndicatorString(2, "Moving towards closest enemy");
+            return Movement.moveToClosestEnemy();
         } else {
             // Not close to Archon yet
-            Movement.retreatToArchon();
-            rc.setIndicatorString(2, "Retreating to archon @: " + nearestArchon.toString());
+            if (nearestArchon != null) {
+                rc.setIndicatorString(2, "Retreating to archon @: " + nearestArchon.toString());
+            }
+            return Movement.retreatToArchon();
         }
     }
     
