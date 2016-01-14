@@ -26,17 +26,6 @@ public class GuardPlayer extends SoldierPlayer {
     public static void tick() throws GameActionException {
         Messaging.handleMessageQueue();
 
-        // If there are more enemies than allies nearby, retreat to the
-        // nearest archon.
-        if (shouldFlee()) {
-            retreatToArchon();
-        }
-
-        // Retreat if our health is less than retreatHealthPercent
-        if (rc.getHealth() < (myRobotType.maxHealth * retreatHealthPercent)) {
-            retreatToArchon();
-        }
-
         // This is redundant checking...
         if (nearbyEnemies.length > 0) {
             if (attackableTraitors.length > 0) {
