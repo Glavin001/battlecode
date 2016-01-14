@@ -80,6 +80,7 @@ public class RobotPlayer {
     static boolean allBoundsSet = false;
     static int maxID = 16383;
     static int messagesSentThisRound = 0;
+    static int minClusterSeparation = 15*15; 
 
     /**
      * Movement
@@ -280,7 +281,8 @@ public class RobotPlayer {
                     Message message = new Message(signal);
                     MapLocation loc = signal.getLocation();
 
-                    switch(message.getTag()){
+                    int switchTag = processTag(message.getTag());
+                    switch(switchTag){
                         // Handle Scout messages about map bounds
                         case MessageTags.SMBN:
                             // Propagate the message to nearby scouts and archons
@@ -309,18 +311,47 @@ public class RobotPlayer {
                         case MessageTags.EARL:
                             nearestEnemyArchon = message.getLocation();
                             break;
+                            
+                        // Store enemy clusters
+                        case MessageTags.CLUS:
+                            storeCluster(new DecayingMapLocation(message.getLocation(), message.getThreat(), message.getTTL()));
+                            break;
                     }
 
                 }
             }
         }
         
+        // Use this to send messages that will not be relayed.
         public static void sendMessage(Message message, int radiusSquared) throws GameActionException{
             messagesSentThisRound++;
             if(messagesSentThisRound > GameConstants.MESSAGE_SIGNALS_PER_TURN){
-                System.out.println("ERROR: TOO MANY MESSAGES SENT THIS ROUND");
+                //System.out.println("ERROR: TOO MANY MESSAGES SENT THIS ROUND: " + Integer.toString(messagesSentThisRound) + " " + message.getTag());
             }else{
+                //System.out.println("DEBUG: MESSAGES SENT THIS ROUND: " + Integer.toString(messagesSentThisRound) + " " + message.getTag() + " " + message.getLocation().toString());
                 message.send(rc, radiusSquared);
+            }
+        }
+        
+        // Use this to send messages that can be relayed.
+        public static void sendRelayableMessage(Message message, int radiusSquared) throws GameActionException{
+            message.setTag(message.getTag() + 1);
+            sendMessage(message, radiusSquared);
+        }
+        
+        // Implementation of relaying system
+        public static int processTag(int tag){
+            if(tag % 2 == 1){
+                tag--;
+            }
+            return tag;
+        }
+        
+        public static boolean isRelayable(int tag){
+            if(tag % 2 == 1){
+                return true;
+            }else{
+                return false;
             }
         }
         
@@ -328,7 +359,7 @@ public class RobotPlayer {
         public static void storeDenLocation(MapLocation loc) {
             for (MapLocation den : knownDens) {
                 // Don't bother to add dens we already know about
-                if (den.x == loc.x && den.y == loc.y) {
+                if (den.equals(loc)) {
                     return;
                 }
             }
@@ -336,6 +367,32 @@ public class RobotPlayer {
             knownDens.add(loc);
             // System.out.println("I found a den this turn at: " +
             // denLoc.toString());
+        }
+        
+        public static boolean storeCluster(DecayingMapLocation dloc){
+            for (DecayingMapLocation knownCluster : knownEnemyClusters) {
+                int clusterSeparation = knownCluster.location.distanceSquaredTo(dloc.location);
+                if (clusterSeparation < minClusterSeparation) {
+                    // If we have a larger threat, replace old cluster with new one
+                    // Also replace if the old threat has expired
+                    if(knownCluster.threatLevel < dloc.threatLevel || knownCluster.ttl == 0){
+                        //System.out.println("I replaced a cluster with at " + knownCluster.location.toString()
+                        //+ " threat: " + knownCluster.threatLevel + " ttl: " + knownCluster.ttl);
+                        //System.out.println(" with the cluster " + dloc.location.toString()
+                        //+ " threat: " + dloc.threatLevel + " ttl: " + dloc.ttl);
+                        knownEnemyClusters.remove(knownCluster);
+                        knownEnemyClusters.add(dloc);
+                        return true;
+                    }
+                    // If it was too close to any one known, don't add it
+                    return false;
+                }
+            }    
+            //If we get here, we are close to none of the existing clusters, so add it.
+            //System.out.println("I added a  new cluster at " + dloc.location.toString()
+            //+ " threat: " + dloc.threatLevel + " ttl: " + dloc.ttl);
+            knownEnemyClusters.add(dloc);
+            return true;
         }
 
     }
@@ -386,6 +443,13 @@ public class RobotPlayer {
         public static void emptyIndicatorStrings() {
             for (int i = 0; i < 3; i++) {
                 rc.setIndicatorString(i, "");
+            }
+        }
+        
+        public static void displayClusters(){
+            for(DecayingMapLocation dloc : knownEnemyClusters){
+                int red = (int)(255 * ((double)dloc.ttl / 127));
+                rc.setIndicatorDot(dloc.location, red, 85, 65);
             }
         }
     }
@@ -463,6 +527,7 @@ public class RobotPlayer {
             try {
                 Debug.emptyIndicatorStrings();
                 updateDecays();
+                Debug.displayClusters();
                 Sensing.updateNearbyEnemies();
                 messagesSentThisRound = 0;
                 if (nearestEnemyArchon != null) {

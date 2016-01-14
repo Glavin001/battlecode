@@ -12,6 +12,7 @@ import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Messaging;
 
 import java.util.Map;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -53,6 +54,7 @@ public class ArchonPlayer extends RobotPlayer {
                     Message message = new Message(signal);
                     Message relayMessage;
                     int messageTag = message.getTag();
+                    int switchTag = Messaging.processTag(messageTag);
                     switch (messageTag) {
                         // Handle Scout messages about map bounds
                         case MessageTags.SMBN: // North
@@ -60,9 +62,12 @@ public class ArchonPlayer extends RobotPlayer {
                         case MessageTags.SMBE: // East
                         case MessageTags.SMBW: // West
                         case MessageTags.ZDEN: // Zombie Dens
-                            // Propagate the message to nearby scouts and archons
-                            relayMessage = new Message(messageTag, message.getLocation());
-                            Messaging.sendMessage(relayMessage, defaultBroadcastRange);
+                        case MessageTags.CLUS: // Enemy Clusters
+                            // Propagate the message to nearby scouts and archons if it is a relable message
+                            if(Messaging.isRelayable(messageTag)){
+                                relayMessage = new Message(switchTag, message.getLocation(), message.getID());
+                                Messaging.sendMessage(relayMessage, defaultBroadcastRange);                                
+                            }
                             break;
                     }
 
@@ -74,17 +79,21 @@ public class ArchonPlayer extends RobotPlayer {
         public static void broadcastMapBounds() throws GameActionException {
 
             // Send northBound
-            Message message = new Message(MessageTags.AMBN, new MapLocation(0, northBound));
+            Message message = new Message(MessageTags.SMBN, new MapLocation(0, northBound));
             Messaging.sendMessage(message, defaultBroadcastRange);
             // East
-            message = new Message(MessageTags.AMBE, new MapLocation(eastBound, 0));
+            message = new Message(MessageTags.SMBE, new MapLocation(eastBound, 0));
             Messaging.sendMessage(message, defaultBroadcastRange);
             // South
-            message = new Message(MessageTags.AMBS, new MapLocation(0, southBound));
+            message = new Message(MessageTags.SMBS, new MapLocation(0, southBound));
             Messaging.sendMessage(message, defaultBroadcastRange);
             // West
-            message = new Message(MessageTags.AMBW, new MapLocation(westBound, 0));
+            message = new Message(MessageTags.SMBW, new MapLocation(westBound, 0));
             Messaging.sendMessage(message, defaultBroadcastRange);
+        }
+        
+        public static void addClusters(DecayingMapLocation dloc){
+            
         }
     }
 
