@@ -56,22 +56,22 @@ public class ArchonPlayer extends RobotPlayer {
                     case MessageTags.SMBN:
                         // Propagate the message to nearby scouts and archons
                         relayMessage = new Message(MessageTags.AMBN, message.getLocation());
-                        relayMessage.send(rc, defaultBroadcastRange);
+                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
                         setMapBound(Direction.NORTH, message.getLocation().y);
                         break;
                     case MessageTags.SMBE:
                         relayMessage = new Message(MessageTags.AMBE, message.getLocation());
-                        relayMessage.send(rc, defaultBroadcastRange);
+                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
                         setMapBound(Direction.EAST, message.getLocation().x);
                         break;
                     case MessageTags.SMBS:
                         relayMessage = new Message(MessageTags.AMBS, message.getLocation());
-                        relayMessage.send(rc, defaultBroadcastRange);
+                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
                         setMapBound(Direction.SOUTH, message.getLocation().y);
                         break;
                     case MessageTags.SMBW:
                         relayMessage = new Message(MessageTags.AMBW, message.getLocation());
-                        relayMessage.send(rc, defaultBroadcastRange);
+                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
                         setMapBound(Direction.WEST, message.getLocation().x);
                         break;
 
@@ -104,16 +104,16 @@ public class ArchonPlayer extends RobotPlayer {
 
             // Send northBound
             Message message = new Message(MessageTags.AMBN, new MapLocation(0, northBound));
-            message.send(rc, defaultBroadcastRange);
+            Messaging.sendMessage(message, defaultBroadcastRange);
             // East
             message = new Message(MessageTags.AMBE, new MapLocation(eastBound, 0));
-            message.send(rc, defaultBroadcastRange);
+            Messaging.sendMessage(message, defaultBroadcastRange);
             // South
             message = new Message(MessageTags.AMBS, new MapLocation(0, southBound));
-            message.send(rc, defaultBroadcastRange);
+            Messaging.sendMessage(message, defaultBroadcastRange);
             // West
             message = new Message(MessageTags.AMBW, new MapLocation(westBound, 0));
-            message.send(rc, defaultBroadcastRange);
+            Messaging.sendMessage(message, defaultBroadcastRange);
         }
     }
 
@@ -144,11 +144,11 @@ public class ArchonPlayer extends RobotPlayer {
                             // Just a note that broadcasting increases core
                             // delay, try to minimize it!
                             Message message = new Message(MessageTags.NAAL);
-                            message.send(rc, broadcastDistance);
+                            Messaging.sendMessage(message, broadcastDistance);
                             if (nearestEnemyArchon != null) {
                                 // Broadcast where enemy archon is
                                 message = new Message(MessageTags.EARL, nearestArchon);
-                                message.send(rc, broadcastDistance);
+                                Messaging.sendMessage(message, broadcastDistance);
                                 // System.out.println("Broadcasting enemy
                                 // archon: "+nearestEnemyArchon.toString());
                             }
