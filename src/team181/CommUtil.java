@@ -34,8 +34,17 @@ public class CommUtil {
         public final static int AMBS = 11123;
         public final static int AMBW = 11124;
         
-        
+        //Zombie den location
         public final static int ZDEN = 20000;
+        
+        //Parts Location
+        public final static int PART = 20001;
+        
+        //Enemy Soldier Cluster
+        public final static int CLUS = 20002;
+        
+        //Neutral Robots Location
+        public final static int NEUT = 20003;
 
     }
     

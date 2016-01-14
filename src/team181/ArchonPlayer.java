@@ -31,11 +31,11 @@ public class ArchonPlayer extends RobotPlayer {
     static Map<Integer, Boolean> waitingMessageID;
     // What was the last message the scout sent?
     static Map<Integer, Integer> lastTransmissionID;
-    
+
     static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();
 
     static class ArchonMessaging {
-     
+
         public static void handleMessageQueue() throws GameActionException {
             // SUPER
             Messaging.handleMessageQueue();
@@ -47,39 +47,39 @@ public class ArchonPlayer extends RobotPlayer {
                     if (signal.getTeam() != rc.getTeam()) {
                         continue;
                     }
-                    
+
                     Message message = new Message(signal);
                     MapLocation loc = signal.getLocation();
                     Message relayMessage;
                     switch (message.getTag()) {
-                        // Handle Scout messages about map bounds
-                        case MessageTags.SMBN:
-                            // Propagate the message to nearby scouts and archons
-                            relayMessage = new Message(MessageTags.AMBN, message.getLocation());
-                            relayMessage.send(rc, defaultBroadcastRange);                          
-                            setMapBound(Direction.NORTH, message.getLocation().y);
-                            break;
-                        case MessageTags.SMBE:
-                            relayMessage = new Message(MessageTags.AMBE, message.getLocation());
-                            relayMessage.send(rc, defaultBroadcastRange);                          
-                            setMapBound(Direction.EAST, message.getLocation().x);
-                            break;
-                        case MessageTags.SMBS:
-                            relayMessage = new Message(MessageTags.AMBS, message.getLocation());
-                            relayMessage.send(rc, defaultBroadcastRange);                          
-                            setMapBound(Direction.SOUTH, message.getLocation().y);
-                            break;
-                        case MessageTags.SMBW:
-                            relayMessage = new Message(MessageTags.AMBW, message.getLocation());
-                            relayMessage.send(rc, defaultBroadcastRange);                          
-                            setMapBound(Direction.WEST, message.getLocation().x);
-                            break;
-    
-                        // Handle reporting of zombie dens
-                        case MessageTags.ZDEN:
-                            storeDenLocation(message.getLocation());
-                            break;
-                        
+                    // Handle Scout messages about map bounds
+                    case MessageTags.SMBN:
+                        // Propagate the message to nearby scouts and archons
+                        relayMessage = new Message(MessageTags.AMBN, message.getLocation());
+                        relayMessage.send(rc, defaultBroadcastRange);
+                        setMapBound(Direction.NORTH, message.getLocation().y);
+                        break;
+                    case MessageTags.SMBE:
+                        relayMessage = new Message(MessageTags.AMBE, message.getLocation());
+                        relayMessage.send(rc, defaultBroadcastRange);
+                        setMapBound(Direction.EAST, message.getLocation().x);
+                        break;
+                    case MessageTags.SMBS:
+                        relayMessage = new Message(MessageTags.AMBS, message.getLocation());
+                        relayMessage.send(rc, defaultBroadcastRange);
+                        setMapBound(Direction.SOUTH, message.getLocation().y);
+                        break;
+                    case MessageTags.SMBW:
+                        relayMessage = new Message(MessageTags.AMBW, message.getLocation());
+                        relayMessage.send(rc, defaultBroadcastRange);
+                        setMapBound(Direction.WEST, message.getLocation().x);
+                        break;
+
+                    // Handle reporting of zombie dens
+                    case MessageTags.ZDEN:
+                        storeDenLocation(message.getLocation());
+                        break;
+
                     }
 
                 }
@@ -88,29 +88,30 @@ public class ArchonPlayer extends RobotPlayer {
         }
 
         public static void storeDenLocation(MapLocation loc) {
-                for (MapLocation den : knownDens) {
-                    //Don't bother to add dens we already know about
-                    if (den.x == loc.x && den.y == loc.y){
-                        return;
-                    }
+            for (MapLocation den : knownDens) {
+                // Don't bother to add dens we already know about
+                if (den.x == loc.x && den.y == loc.y) {
+                    return;
                 }
-                // Create a new map location at the reported spot.
-                knownDens.add(loc);
-//              System.out.println("I found a den this turn at: " + denLoc.toString());
+            }
+            // Create a new map location at the reported spot.
+            knownDens.add(loc);
+            // System.out.println("I found a den this turn at: " +
+            // denLoc.toString());
         }
 
         public static void broadcastMapBounds() throws GameActionException {
-            
-            //Send northBound
+
+            // Send northBound
             Message message = new Message(MessageTags.AMBN, new MapLocation(0, northBound));
             message.send(rc, defaultBroadcastRange);
-            //East
+            // East
             message = new Message(MessageTags.AMBE, new MapLocation(eastBound, 0));
             message.send(rc, defaultBroadcastRange);
-            //South
+            // South
             message = new Message(MessageTags.AMBS, new MapLocation(0, southBound));
             message.send(rc, defaultBroadcastRange);
-            //West
+            // West
             message = new Message(MessageTags.AMBW, new MapLocation(westBound, 0));
             message.send(rc, defaultBroadcastRange);
         }
@@ -148,7 +149,8 @@ public class ArchonPlayer extends RobotPlayer {
                                 // Broadcast where enemy archon is
                                 message = new Message(MessageTags.EARL, nearestArchon);
                                 message.send(rc, broadcastDistance);
-//                                System.out.println("Broadcasting enemy archon: "+nearestEnemyArchon.toString());
+                                // System.out.println("Broadcasting enemy
+                                // archon: "+nearestEnemyArchon.toString());
                             }
                             // If it is a scout, tell it the new bounds that we
                             // already know
@@ -183,18 +185,18 @@ public class ArchonPlayer extends RobotPlayer {
 
     public static void tick() throws GameActionException {
         ArchonMessaging.handleMessageQueue();
-        
+
         rc.setIndicatorString(2, "All bounds known?: " + " " + Boolean.toString(allBoundsSet)
                 + Integer.toString(northBound) + "was nb and eb is: " + Integer.toString(eastBound));
         rc.setIndicatorString(2, "Number of known dens: " + Integer.toString(knownDens.size()));
         if (nearestEnemyArchon != null) {
             rc.setIndicatorString(2, "Enemy Archon location: " + nearestEnemyArchon);
         } else {
-//            System.out.println("unknown enemy archon location");
+            // System.out.println("unknown enemy archon location");
         }
-        if (!knownDens.isEmpty()) {
-            int fate = rand.nextInt(knownDens.size());
-            rc.setIndicatorString(2, "Den: " + Integer.toString(fate + 1) + " " + knownDens.get(fate).toString());
+        
+        for (MapLocation loc : knownDens) {
+            rc.setIndicatorDot(loc, 180, 80, 180);
         }
 
         // Priorities
@@ -202,7 +204,7 @@ public class ArchonPlayer extends RobotPlayer {
         if (Building.tryBuildUnit(nextRobotTypeToBuild())) {
             return;
         }
-        
+
         // Survival
         if (shouldFlee()) {
             if (rc.isCoreReady()) {
@@ -246,13 +248,14 @@ public class ArchonPlayer extends RobotPlayer {
             if (!bestDir.equals(Direction.NONE)) {
                 rc.move(bestDir);
                 rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
-                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);;
+                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
+                ;
                 return;
             }
         }
 
         // Move randomly!
-        //Movement.randomMove();
+        // Movement.randomMove();
 
     }
 
@@ -264,7 +267,7 @@ public class ArchonPlayer extends RobotPlayer {
     static RobotType nextRobotTypeToBuild() {
         int roundNumber = rc.getRoundNum();
         // Build Scouts at the start
-        if (roundNumber < 20) {//This is not valid at start 
+        if (roundNumber < 20) {// This is not valid at start
             return RobotType.GUARD;
         } else if (roundNumber < 80
                 || (roundNumber > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 3)) {
@@ -278,7 +281,7 @@ public class ArchonPlayer extends RobotPlayer {
             return RobotType.GUARD;
         } else if (roundNumber < 120) {
             return RobotType.SCOUT;
-        } else if(roundNumber > 150) {
+        } else if (roundNumber > 150) {
             return RobotType.SOLDIER;
         } else {
             return RobotType.GUARD;
@@ -349,7 +352,7 @@ public class ArchonPlayer extends RobotPlayer {
      * Repair nearby allies
      * 
      * @param allies
-     * @return 
+     * @return
      * @throws GameActionException
      */
     static boolean repairAllies(RobotInfo[] allies) throws GameActionException {
