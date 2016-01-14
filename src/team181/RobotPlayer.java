@@ -33,7 +33,7 @@ public class RobotPlayer {
     static RobotInfo[] veryCloseAllies;
     static RobotInfo[] attackableZombies;
     static RobotInfo[] attackableTraitors;
-//    static RobotInfo[] attackableEnemies;
+    static RobotInfo[] attackableEnemies;
     static Random rand;
     static int myAttackRange;
     static Team myTeam;
@@ -82,7 +82,7 @@ public class RobotPlayer {
             return directions[fate % 8];
         }
 
-        public static void randomMove() throws GameActionException {
+        public static boolean randomMove() throws GameActionException {
             int fate = rand.nextInt(8);
             if (rc.isCoreReady()) {
                 Direction dirToMove;
@@ -91,53 +91,58 @@ public class RobotPlayer {
                     if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
                         // Too much rubble, so I should clear it
                         rc.clearRubble(dirToMove);
-                        break;
+                        return true;
                         // Check if I can move in this direction
                     } else if (rc.canMove(dirToMove)) {
                         // Move
                         rc.move(dirToMove);
-                        break;
+                        return true;
                     }
                 }
             } else {
                 // rc.setIndicatorString(0, "I could not move this turn");
             }
+            return false;
         }
 
-        public static void retreatToArchon() throws GameActionException {
-            pathToLocation(nearestArchon);
+        public static boolean retreatToArchon() throws GameActionException {
+            if (nearestArchon != null) {
+                return pathToLocation(nearestArchon);
+            } else {
+                return moveToClosestAlly();
+            }
         }
 
-        public static void moveToClosestEnemy() throws GameActionException {
+        public static boolean moveToClosestEnemy() throws GameActionException {
             if (nearbyEnemies.length > 0) {
-                pathToLocation(Util.closestRobot(myLocation, nearbyEnemies).location);
+                return pathToLocation(Util.closestRobot(myLocation, nearbyEnemies).location);
             } else {
-                moveToClosestEnemyArchon();
+                return moveToClosestEnemyArchon();
             }
         }
 
-        public static void moveToClosestEnemyArchon() throws GameActionException {
+        public static boolean moveToClosestEnemyArchon() throws GameActionException {
             if (nearestEnemyArchon != null) {
-                pathToLocation(nearestEnemyArchon);
+                return pathToLocation(nearestEnemyArchon);
             } else {
-                randomMove();
+                return randomMove();
             }
         }
 
         
-        public static void moveToClosestTraitor() throws GameActionException {
+        public static boolean moveToClosestTraitor() throws GameActionException {
             if (nearbyTraitors.length > 0) {
-                pathToLocation(Util.closestRobot(myLocation, nearbyTraitors).location);
+                return pathToLocation(Util.closestRobot(myLocation, nearbyTraitors).location);
             } else {
-                randomMove();
+                return randomMove();
             }
         }
         
-        public static void moveToClosestAlly() throws GameActionException {
+        public static boolean moveToClosestAlly() throws GameActionException {
             if (nearbyAllies.length > 0) {
-                pathToLocation(Util.closestRobot(myLocation, nearbyAllies).location);
+                return pathToLocation(Util.closestRobot(myLocation, nearbyAllies).location);
             } else {
-                randomMove();
+                return randomMove();
             }
         }
 
@@ -150,23 +155,29 @@ public class RobotPlayer {
 
         }
 
-        public static void pathToLocation(MapLocation loc) throws GameActionException {
+        public static boolean pathToLocation(MapLocation loc) throws GameActionException {
             if (rc.isCoreReady()) {
                 Direction dirToMove = myLocation.directionTo(loc);
                 rc.setIndicatorString(0, "Direction to path is: " + dirToMove.toString());
                 if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
                     // Too much rubble, so I should clear it
                     rc.clearRubble(dirToMove);
+                    return true;
                     // Check if I can move in this direction
                 } else if (rc.canMove(dirToMove)) {
                     rc.move(dirToMove);
+                    return true;
                 } else if (rc.canMove(dirToMove.rotateLeft())) {
                     rc.move(dirToMove.rotateLeft());
+                    return true;
                 } else if (rc.canMove(dirToMove.rotateRight())) {
                     rc.move(dirToMove.rotateRight());
+                    return true;
                 }
             }
+            return false;
         }
+        
     }
 
     static class Offensive {
@@ -451,7 +462,7 @@ public class RobotPlayer {
      * @param robot
      * @return Total Score for single robot
      */
-    private static double scoreRobot(RobotInfo robot) {
+    protected static double scoreRobot(RobotInfo robot) {
         return (robot.attackPower + robot.health) / (robot.weaponDelay + 1.0);
     }
 
@@ -511,6 +522,8 @@ public class RobotPlayer {
             for (int i=1; i<len; i++) {
                 RobotInfo robot = robots[i];
                 double rank = rankRobotAttackPriority(robot);
+//                int color = (int) Math.max(0, Math.min(255, rank));
+                rc.setIndicatorDot(robot.location, 0, 255, 255);
                 if (rank > bestRank) {
                     bestRobot = robot;
                     bestRank = rank;
@@ -533,11 +546,12 @@ public class RobotPlayer {
      * @return The total robot ranking
      */
     public static double rankRobotAttackPriority(RobotInfo robot) {
+        
         if (robot.type.equals(RobotType.ARCHON)) {
-//            double archonCoef = 1000.0;
+            // double archonCoef = 1000.0;
             // Distance to the archon
             // Find the closest archon!
-            return rc.getType().sensorRadiusSquared / myLocation.distanceSquaredTo(robot.location);
+            return myRobotType.sensorRadiusSquared / myLocation.distanceSquaredTo(robot.location);
         }
         // Weakest
         return -scoreRobot(robot);
