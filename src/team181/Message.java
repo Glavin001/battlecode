@@ -32,6 +32,17 @@ public class Message {
         setTag(tag);
         setLocation(loc);
     }    
+    
+    //Construct a new message from scratch without an id or location
+    public Message(int tag){
+        setTag(tag);
+    }       
+    
+    public Message(Message m){
+        setTag(m.getTag());
+        setLocation(m.getLocation());
+        setID(m.getID());        
+    }
        
     public void setTag(int tag){
         part1 = part1 | (tag * offset);

@@ -15,13 +15,9 @@ public class CommUtil {
          */
         public final static int NAAL = 11111;
         /**
-         * Enemy Archon Location.x
+         * Enemy Archon Location
          */
-        public final static int EALX = 11112;
-        /**
-         * Enemy Archon Location.y
-         */
-        public final static int EALY = 11113;
+        public final static int EARL = 11112;
 
         /**
          *  Scout Map Bounds North

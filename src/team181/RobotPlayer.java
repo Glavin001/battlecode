@@ -1,11 +1,10 @@
 package team181;
 
 import battlecode.common.*;
+import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
-import team181.RobotPlayer.messageConstants;
-
 import java.util.Arrays;
 import java.util.Random;
 
@@ -218,27 +217,16 @@ public class RobotPlayer {
                     if (signal.getTeam() != rc.getTeam()) {
                         continue;
                     }
-
+                    Message message = new Message(signal);
                     MapLocation loc = signal.getLocation();
-                    int msg1 = signal.getMessage()[0];
-                    int msg2 = signal.getMessage()[1];
-                    int id = signal.getID();
-                    
-                    rc.setIndicatorString(1, "Message Recieved was: " + Integer.toString(msg1) + " "
-                            + Integer.toString(msg2));
-                    // Set the nearest archon location if appropriate message
-                    // was received.
-                    switch (msg1) {
+
+                    switch(message.getTag()){
                         case (MessageTags.NAAL) :
                                 nearestArchon = loc;
                             break;
-                            // Handle reporting of enemy archon locations
-                        case MessageTags.EALX:
-                            tempLoc = new MapLocation(msg2, loc.y);
-                            break;
-                        case MessageTags.EALY:
-                            nearestEnemyArchon = new MapLocation(tempLoc.x, msg2);
-//                            System.out.println("received enemy archon location: "+nearestEnemyArchon.toString());
+                        // Handle reporting of enemy archon locations
+                        case MessageTags.EARL:
+                            nearestEnemyArchon = message.getLocation();
                             break;
                     }
 

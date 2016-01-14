@@ -12,7 +12,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
-import team181.CommUtil.Message;
 import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
@@ -211,10 +210,8 @@ public class ScoutPlayer extends RobotPlayer {
                 if (r.type.equals(RobotType.ARCHON)) {
                     didJustBroadcast = true;
                     int distToNearestArchon = 10000; //nearestArchon.distanceSquaredTo(rc.getLocation());
-                    rc.broadcastMessageSignal(MessageTags.EALX, r.location.x,
-                            distToNearestArchon);
-                    rc.broadcastMessageSignal(MessageTags.EALY, r.location.y,
-                            distToNearestArchon);
+                    Message message = new Message(MessageTags.EARL, r.location, r.ID);
+                    message.send(rc, distToNearestArchon);
                     rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: "+r.location.toString());
 //                    System.out.println("I transmitted Enemy Archon Location this turn: "+r.location.toString());
                     break;
