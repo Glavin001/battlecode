@@ -180,16 +180,13 @@ public class ScoutPlayer extends RobotPlayer {
             for (MapLocation fixedUnit : knowns) {
                 if (fixedUnit.equals(loc)) {
                     wasDuplicate = true;
-                    continue;
+                    // If it was a duplicate, go to next object and don't broadcast
+                    return;
                 }
             }
-            // If it was a duplicate, go to next object and don't broadcast
-            if (wasDuplicate) {
-                return;
-            } else {
-                // Otherwise we are dealing with a new object.
-                knowns.add(loc);
-            }
+            // Otherwise we are dealing with a new object.
+            rc.setIndicatorDot(loc, 255, 100, 255);
+            knowns.add(loc);
             Messaging.sendMessage(message, squaredRadius);;
         }
         
