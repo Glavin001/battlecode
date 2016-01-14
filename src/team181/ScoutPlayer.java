@@ -12,6 +12,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
+import battlecode.instrumenter.inject.System;
 import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
@@ -33,8 +34,9 @@ public class ScoutPlayer extends RobotPlayer {
     static boolean haveBroadCastedMapBounds = false;
     static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();;
     static int numKnownDens = 0;
-    
-    static boolean didJustBroadcast = false;
+    // Rounds until we are allowed to broadcast again
+    static int broadCastCooldown = 0;
+    static int incurredCooldownPerBroadcast = 40;
 
     // Enclosure for all of the exploration functions
     static class Exploration {
@@ -92,7 +94,7 @@ public class ScoutPlayer extends RobotPlayer {
 
         public static void broadcastMapBounds() throws GameActionException {
             int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
-            
+            rc.setIndicatorString(2, "I am broadcasting map coordinates now.");
             //Send north bound
             Message message = new Message(MessageTags.SMBN, new MapLocation(rc.getLocation().x, northBound));
             message.send(rc, distToNearestArchon);
@@ -109,9 +111,6 @@ public class ScoutPlayer extends RobotPlayer {
 
         public static void tryExplore() throws GameActionException {
             // If we have not found every bound
-            if(didJustBroadcast) {
-                System.out.println("Found arcon but keep moving.");
-            }
             if (numExploredDirections != 4 && allBoundsSet != true) {
                 // If we don't already have a bound for this direction
                 if (!haveOffsets[returnCardinalIndex(currentExploreDirection)]) {
@@ -128,6 +127,7 @@ public class ScoutPlayer extends RobotPlayer {
                 }
             } else if (!haveBroadCastedMapBounds) {
                 broadcastMapBounds();
+                haveBroadCastedMapBounds = true;
             } else {
                 explore(Movement.randomDirection());
 //                explore(myLocation.directionTo(nearestArchon).opposite());
@@ -204,21 +204,19 @@ public class ScoutPlayer extends RobotPlayer {
 
     public static void tick() throws GameActionException {
         ScoutMessaging.handleMessageQueue();
-        
-        if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && !didJustBroadcast) {
+        if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {
-                    didJustBroadcast = true;
-                    int distToNearestArchon = 10000; //nearestArchon.distanceSquaredTo(rc.getLocation());
+                    broadCastCooldown += incurredCooldownPerBroadcast ;
+                    int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
                     Message message = new Message(MessageTags.EARL, r.location, r.ID);
                     message.send(rc, distToNearestArchon);
                     rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: "+r.location.toString());
-//                    System.out.println("I transmitted Enemy Archon Location this turn: "+r.location.toString());
                     break;
                 }
             }
-        } else if (didJustBroadcast) {
-            didJustBroadcast = false;
+        } else if (broadCastCooldown > 0) {
+            broadCastCooldown--; 
         }
 
         Exploration.tryExplore();
