@@ -7,7 +7,7 @@ public class DecayingMapLocation {
     public int ttl;
     public int threatLevel;
     
-    public static final int defaultTTL = 40;
+    public static final int defaultTTL = 20;
     //Max values that can be stored in 7 bits
     public static final int maxTTL = 127;
     public static final int maxThreat = 127;

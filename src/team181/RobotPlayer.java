@@ -81,6 +81,7 @@ public class RobotPlayer {
     static int maxID = 16383;
     static int messagesSentThisRound = 0;
     static int minClusterSeparation = 15*15; 
+    static int clusterExpiry = 10;
 
     /**
      * Movement
@@ -375,7 +376,7 @@ public class RobotPlayer {
                 if (clusterSeparation < minClusterSeparation) {
                     // If we have a larger threat, replace old cluster with new one
                     // Also replace if the old threat has expired
-                    if(knownCluster.threatLevel < dloc.threatLevel || knownCluster.ttl == 0){
+                    if(knownCluster.threatLevel < dloc.threatLevel || knownCluster.ttl <= clusterExpiry){
                         //System.out.println("I replaced a cluster with at " + knownCluster.location.toString()
                         //+ " threat: " + knownCluster.threatLevel + " ttl: " + knownCluster.ttl);
                         //System.out.println(" with the cluster " + dloc.location.toString()
@@ -587,6 +588,8 @@ public class RobotPlayer {
         for(DecayingMapLocation dloc : knownEnemyClusters){
             if(dloc.ttl > 0){
                 dloc.ttl--;
+            }else{
+                knownEnemyClusters.remove(dloc);
             }
         }
     }
