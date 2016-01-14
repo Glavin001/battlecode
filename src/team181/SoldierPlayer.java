@@ -5,7 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import team181.RobotPlayer.Debug;
+import team181.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
 

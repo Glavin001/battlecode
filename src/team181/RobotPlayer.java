@@ -2,7 +2,7 @@ package team181;
 
 import battlecode.common.*;
 import team181.CommUtil.MessageTags;
-import team181.RobotPlayer.Debug;
+import team181.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Movement;
 import team181.RobotPlayer.Sensing;
@@ -22,7 +22,10 @@ public class RobotPlayer {
      * Battlecode world. If this method returns, the robot dies!
      **/
     @SuppressWarnings("unused")
-
+    
+    //Set this with your first name all lower case to get logging for your user.
+    static final String debugUser = "shawn";
+    
     static RobotController rc;
     static Direction[] directions = { Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
             Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST };
@@ -346,15 +349,6 @@ public class RobotPlayer {
         }
     }
 
-    static class Debug {
-        // Prevent indicator string for persisting longer than 1 turn
-        public static void emptyIndicatorStrings() {
-            for (int i = 0; i < 3; i++) {
-                rc.setIndicatorString(i, "");
-            }
-        }
-    }
-
     public static void setMapBound(Direction dir, int bound) {
         if (!allBoundsSet) {
             if (dir == Direction.NORTH) {
@@ -384,6 +378,7 @@ public class RobotPlayer {
     public static void run(RobotController inrc) {
         // You can instantiate variables here.
         rc = inrc;
+        Debug.init(rc, debugUser);
         rand = new Random(rc.getID());
         myAttackRange = 0;
         myTeam = rc.getTeam();

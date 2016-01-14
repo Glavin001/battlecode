@@ -1,15 +1,8 @@
 package team181;
 
-import battlecode.common.Clock;
 import battlecode.common.GameActionException;
-import battlecode.common.RobotInfo;
 import battlecode.common.Team;
-import team181.RobotPlayer.Debug;
-import team181.RobotPlayer.Messaging;
-import team181.RobotPlayer.Movement;
-import team181.RobotPlayer.Offensive;
-import team181.RobotPlayer.Sensing;
-
+import team181.Debug;
 /**
  * Guard Player code
  *
@@ -25,7 +18,6 @@ public class GuardPlayer extends SoldierPlayer {
     
     public static void tick() throws GameActionException {
         Messaging.handleMessageQueue();
-
         // This is redundant checking...
         if (nearbyEnemies.length > 0) {
             if (attackableTraitors.length > 0) {
