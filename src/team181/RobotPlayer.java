@@ -4,6 +4,7 @@ import battlecode.common.*;
 import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
+import team181.RobotPlayer.Movement;
 import team181.RobotPlayer.Sensing;
 import java.util.Arrays;
 import java.util.Random;
@@ -103,6 +104,43 @@ public class RobotPlayer {
                 // rc.setIndicatorString(0, "I could not move this turn");
             }
             return false;
+        }
+        
+        public static void randomMoveAroundArcon(int squaredMin, int squaredMax) throws GameActionException {
+            int fate = rand.nextInt(999);
+            if (rc.isCoreReady()) {
+                Direction dirToMove;
+                for (int i = 0; i < 8; i++) {
+                    dirToMove = directions[(fate + i) % 8];
+                    if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+                        // Too much rubble, so I should clear it
+                        rc.clearRubble(dirToMove);
+                        break;
+                        // Check if I can move in this direction
+                    } else if (rc.canMove(dirToMove)) {
+                        // Move
+                        MapLocation newLocation = myLocation.add(dirToMove);
+                        int distance = (newLocation.x - nearestArchon.x) * (newLocation.x - nearestArchon.x) + 
+                                (newLocation.y - nearestArchon.y) * (newLocation.y - nearestArchon.y);
+                        if (distance >= squaredMin && distance <= squaredMax) {
+                            rc.move(dirToMove);
+                            return;
+                        }
+                    }
+                }
+                if (nearestArchon != null) {
+                    retreatToArchon();
+                }
+            } else {
+                // rc.setIndicatorString(0, "I could not move this turn");
+            }
+        }
+        
+        private static MapLocation getNewSpotToMove(Direction direction) {
+            MapLocation myLocation = rc.getLocation();
+            myLocation.add(direction);
+            return myLocation;
+            
         }
 
         public static boolean retreatToArchon() throws GameActionException {
