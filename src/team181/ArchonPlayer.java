@@ -62,9 +62,10 @@ public class ArchonPlayer extends RobotPlayer {
                         case MessageTags.SMBE: // East
                         case MessageTags.SMBW: // West
                         case MessageTags.ZDEN: // Zombie Dens
+                        case MessageTags.CLUS: // Enemy Clusters
                             // Propagate the message to nearby scouts and archons if it is a relable message
                             if(Messaging.isRelayable(messageTag)){
-                                relayMessage = new Message(switchTag, message.getLocation());
+                                relayMessage = new Message(switchTag, message.getLocation(), message.getID());
                                 Messaging.sendMessage(relayMessage, defaultBroadcastRange);                                
                             }
                             break;
@@ -89,6 +90,10 @@ public class ArchonPlayer extends RobotPlayer {
             // West
             message = new Message(MessageTags.SMBW, new MapLocation(westBound, 0));
             Messaging.sendMessage(message, defaultBroadcastRange);
+        }
+        
+        public static void addClusters(DecayingMapLocation dloc){
+            
         }
     }
 

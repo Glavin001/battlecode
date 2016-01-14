@@ -34,7 +34,6 @@ public class ScoutPlayer extends RobotPlayer {
     // Rounds until we are allowed to broadcast again
     static int broadCastCooldown = 0;
     static int incurredCooldownPerBroadcast = 40;
-    static int minClusterSeparation = 15*15; 
 
     private static class Exploration {
 
@@ -199,27 +198,17 @@ public class ScoutPlayer extends RobotPlayer {
         }    
         
         // Report enemy clusters if a new one is found
-        public static void reportEnemyCluster(MapLocation loc, int threatLevel, ArrayList<DecayingMapLocation> knowns, int squaredRadius) throws GameActionException{
-            // Check known unit so we don't add duplicates
-            boolean wasTooClose = false;
-            for (DecayingMapLocation knownCluster : knowns) {
-                int clusterSeparation = knownCluster.location.distanceSquaredTo(loc);
-                if (clusterSeparation < minClusterSeparation) {
-                    wasTooClose = true;
-                    // If it was a duplicate, go to next object and don't broadcast
-                    return;
-                }
-            }
-            // Otherwise we are dealing with a new object.
-            // Maximum transmissible information for non-locations
-            if(threatLevel > maxID){
-                threatLevel = maxID;
-            }
-            rc.setIndicatorDot(loc, 80, 80, 255);
+        public static void reportEnemyCluster(MapLocation loc, int threatLevel, int squaredRadius) throws GameActionException{
+            // Add the new cluster if needed.
             DecayingMapLocation cluster = new DecayingMapLocation(loc, threatLevel);
-            knowns.add(cluster);
-            Message message = new Message(MessageTags.CLUS, cluster.location, cluster.ttl);
-            Messaging.sendMessage(message, squaredRadius);
+            boolean wasUpdated = Messaging.storeCluster(cluster);
+            if(wasUpdated){
+                // Alert other units of its presence.
+                rc.setIndicatorDot(loc, 80, 80, 255);
+                Message message = new Message(MessageTags.CLUS, cluster);
+                Messaging.sendMessage(message, squaredRadius);                
+            }
+
         }
 
         // Broadcasts a report on all nearby interesting objects.
@@ -255,7 +244,7 @@ public class ScoutPlayer extends RobotPlayer {
                 averageEnemyX = averageEnemyX / nearbyEnemies.length;
                 averageEnemyY = averageEnemyY / nearbyEnemies.length;
                 MapLocation loc = new MapLocation(averageEnemyX, averageEnemyY);
-                reportEnemyCluster(loc, threatLevel, knownEnemyClusters, distToNearestArchon);
+                reportEnemyCluster(loc, threatLevel, distToNearestArchon);
             }
             
             for (RobotInfo robot : nearbyNeutrals) {

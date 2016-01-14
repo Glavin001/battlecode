@@ -8,16 +8,17 @@ public class DecayingMapLocation {
     public int threatLevel;
     
     public static final int defaultTTL = 40;
+    //Max values that can be stored in 7 bits
+    public static final int maxTTL = 127;
+    public static final int maxThreat = 127;
     
     public DecayingMapLocation(MapLocation loc, int threatLevel, int ttl) {
-        location = loc;
-        this.ttl = ttl;
-        this.threatLevel = threatLevel;
+        this.location = loc;
+        this.ttl = Math.min(ttl, maxTTL);
+        this.threatLevel = Math.min(ttl, maxTTL);
     }
     
     public DecayingMapLocation(MapLocation loc, int threatLevel) {
-        location = loc;
-        this.ttl = defaultTTL;
-        this.threatLevel = threatLevel;
+        this(loc, threatLevel, defaultTTL);
     }    
 }

@@ -11,10 +11,15 @@ public class Message {
     private int part1 = 0;
     private int part2 = 0;
     
+    // Messages have a capacity of 31 bits each; the last 16 are occupied by the coordinates,
+    // The first 15 in part1 are used for the tag, and the first 15 in part2 used for ID or extra information.
+    
     /**
      *  Offset that shifts tags and ids past the last 16 bits of the message. 
      */
     private int offset = (int)Math.pow(2.0, 16);
+    private int ttlOffset = (int)Math.pow(2.0, 16);
+    private int threatOffset = (int)Math.pow(2.0, 23);
     
     /** 
      * Construct message from incoming signal
@@ -43,8 +48,7 @@ public class Message {
      * @param loc
      */
     public Message(int tag, MapLocation loc){
-        setTag(tag);
-        setLocation(loc);
+        this(tag, loc, 0);
     }    
     
     /** 
@@ -52,13 +56,26 @@ public class Message {
      * @param tag
      */
     public Message(int tag){
-        setTag(tag);
+        this(tag, new MapLocation(0,0), 0);
     }       
     
     public Message(Message m){
-        setTag(m.getTag());
-        setLocation(m.getLocation());
-        setID(m.getID());        
+        this(m.getTag(), m.getLocation(), m.getID());        
+    }
+    
+    public Message(int tag, DecayingMapLocation dloc){
+        setTag(tag);
+        setLocation(dloc.location);
+        setTTL(dloc.ttl);
+        setThreat(dloc.threatLevel);
+    }
+    
+    public void setTTL(int ttl){
+        part2 = part2 | (ttl * ttlOffset);
+    }
+    
+    public void setThreat(int threat){
+        part2 = part2 | (threat * threatOffset);
     }
        
     public void setTag(int tag){
@@ -80,6 +97,14 @@ public class Message {
     
     public int getID(){
         return (int)Math.floor(part2 / offset);
+    }
+    
+    public int getTTL(){
+        return (int)Math.floor(part2 / ttlOffset);
+    }
+    
+    public int getThreat(){
+        return (int)Math.floor(part2 / threatOffset);
     }
     
     public MapLocation getLocation(){
