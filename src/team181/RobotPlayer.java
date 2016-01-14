@@ -344,6 +344,7 @@ public class RobotPlayer {
             ArchonPlayer.initialize();
             break;
         case TURRET:
+        case TTM:
             TurretPlayer.initialize();
             break;
         case SOLDIER:
@@ -378,6 +379,7 @@ public class RobotPlayer {
                         ArchonPlayer.tick();
                         break;
                     case TURRET:
+                    case TTM:
                         TurretPlayer.tick();
                         break;
                     case SOLDIER:
