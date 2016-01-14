@@ -38,7 +38,7 @@ public class RobotPlayer {
     static RobotInfo[] attackableZombies;
     static RobotInfo[] attackableTraitors;
     static RobotInfo[] attackableEnemies;
-    static MapLocation[] nearbyParts;    
+    static MapLocation[] nearbyParts;
     static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();
     static ArrayList<MapLocation> knownNeutrals = new ArrayList<MapLocation>();
     static ArrayList<MapLocation> knownParts = new ArrayList<MapLocation>();
@@ -281,6 +281,27 @@ public class RobotPlayer {
                     MapLocation loc = signal.getLocation();
 
                     switch(message.getTag()){
+                        // Handle Scout messages about map bounds
+                        case MessageTags.SMBN:
+                            // Propagate the message to nearby scouts and archons
+                            setMapBound(Direction.NORTH, message.getLocation().y);
+                            break;
+                        case MessageTags.SMBE:
+                            setMapBound(Direction.EAST, message.getLocation().x);
+                            break;
+                        case MessageTags.SMBS:
+                            setMapBound(Direction.SOUTH, message.getLocation().y);
+                            break;
+                        case MessageTags.SMBW:
+                            setMapBound(Direction.WEST, message.getLocation().x);
+                            break;
+    
+                        // Handle reporting of zombie dens
+                        case MessageTags.ZDEN:
+                            storeDenLocation(message.getLocation());
+                            break;
+                        
+                        // Nearest ally archon
                         case (MessageTags.NAAL) :
                                 nearestArchon = loc;
                             break;
@@ -301,6 +322,20 @@ public class RobotPlayer {
             }else{
                 message.send(rc, radiusSquared);
             }
+        }
+        
+        
+        public static void storeDenLocation(MapLocation loc) {
+            for (MapLocation den : knownDens) {
+                // Don't bother to add dens we already know about
+                if (den.x == loc.x && den.y == loc.y) {
+                    return;
+                }
+            }
+            // Create a new map location at the reported spot.
+            knownDens.add(loc);
+            // System.out.println("I found a den this turn at: " +
+            // denLoc.toString());
         }
 
     }

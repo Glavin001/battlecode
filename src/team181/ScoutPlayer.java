@@ -222,7 +222,7 @@ public class ScoutPlayer extends RobotPlayer {
             DecayingMapLocation cluster = new DecayingMapLocation(loc, threatLevel);
             knowns.add(cluster);
             Message message = new Message(MessageTags.CLUS, cluster.location, cluster.ttl);
-            Messaging.sendMessage(message, squaredRadius);      
+            Messaging.sendMessage(message, squaredRadius);
         }
 
         // Broadcasts a report on all nearby interesting objects.
@@ -234,15 +234,18 @@ public class ScoutPlayer extends RobotPlayer {
             int averageEnemyX = 0;
             int averageEnemyY = 0;
             for (RobotInfo robot : nearbyEnemies) {
-                if(robot.type == RobotType.ZOMBIEDEN){
-                    reportFixedRobot(MessageTags.ZDEN, robot, knownDens, distToNearestArchon);
-                }else switch(robot.type){
+                switch(robot.type){
+                    case ZOMBIEDEN:
+                        reportFixedRobot(MessageTags.ZDEN, robot, knownDens, distToNearestArchon);
+                        break;
                     case SOLDIER:
                     case GUARD:
                     case VIPER:
                         threatLevel += 1;
                         averageEnemyX += robot.location.x;
-                        averageEnemyY += robot.location.y;                  
+                        averageEnemyY += robot.location.y;
+                    default:
+                        break;
                 }
             }
             // If we detected any enemies, then report their cluster location

@@ -32,10 +32,12 @@ public class ArchonPlayer extends RobotPlayer {
     // What was the last message the scout sent?
     static Map<Integer, Integer> lastTransmissionID;
 
-    static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();
-
     static class ArchonMessaging {
 
+        /**
+         * Relay / Broadcast messages to local robots
+         * @throws GameActionException
+         */
         public static void handleMessageQueue() throws GameActionException {
             // SUPER
             Messaging.handleMessageQueue();
@@ -49,55 +51,24 @@ public class ArchonPlayer extends RobotPlayer {
                     }
 
                     Message message = new Message(signal);
-                    MapLocation loc = signal.getLocation();
                     Message relayMessage;
-                    switch (message.getTag()) {
-                    // Handle Scout messages about map bounds
-                    case MessageTags.SMBN:
-                        // Propagate the message to nearby scouts and archons
-                        relayMessage = new Message(MessageTags.AMBN, message.getLocation());
-                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
-                        setMapBound(Direction.NORTH, message.getLocation().y);
-                        break;
-                    case MessageTags.SMBE:
-                        relayMessage = new Message(MessageTags.AMBE, message.getLocation());
-                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
-                        setMapBound(Direction.EAST, message.getLocation().x);
-                        break;
-                    case MessageTags.SMBS:
-                        relayMessage = new Message(MessageTags.AMBS, message.getLocation());
-                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
-                        setMapBound(Direction.SOUTH, message.getLocation().y);
-                        break;
-                    case MessageTags.SMBW:
-                        relayMessage = new Message(MessageTags.AMBW, message.getLocation());
-                        Messaging.sendMessage(relayMessage, defaultBroadcastRange);
-                        setMapBound(Direction.WEST, message.getLocation().x);
-                        break;
-
-                    // Handle reporting of zombie dens
-                    case MessageTags.ZDEN:
-                        storeDenLocation(message.getLocation());
-                        break;
-
+                    int messageTag = message.getTag();
+                    switch (messageTag) {
+                        // Handle Scout messages about map bounds
+                        case MessageTags.SMBN: // North
+                        case MessageTags.SMBS: // South
+                        case MessageTags.SMBE: // East
+                        case MessageTags.SMBW: // West
+                        case MessageTags.ZDEN: // Zombie Dens
+                            // Propagate the message to nearby scouts and archons
+                            relayMessage = new Message(messageTag, message.getLocation());
+                            Messaging.sendMessage(relayMessage, defaultBroadcastRange);
+                            break;
                     }
 
                 }
             }
 
-        }
-
-        public static void storeDenLocation(MapLocation loc) {
-            for (MapLocation den : knownDens) {
-                // Don't bother to add dens we already know about
-                if (den.x == loc.x && den.y == loc.y) {
-                    return;
-                }
-            }
-            // Create a new map location at the reported spot.
-            knownDens.add(loc);
-            // System.out.println("I found a den this turn at: " +
-            // denLoc.toString());
         }
 
         public static void broadcastMapBounds() throws GameActionException {
@@ -272,11 +243,11 @@ public class ArchonPlayer extends RobotPlayer {
         } else if (roundNumber < 80
                 || (roundNumber > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 3)) {
             // If there are no enemies, we do not need offensive yet
-            if (nearbyEnemies.length > 0) {
+//            if (nearbyEnemies.length > 0) {
                 return RobotType.TURRET;
-            } else {
-                return RobotType.TTM;
-            }
+//            } else {
+//                return RobotType.TTM;
+//            }
         } else if (roundNumber > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 2) {
             return RobotType.GUARD;
         } else if (roundNumber < 120) {
