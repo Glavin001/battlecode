@@ -272,11 +272,11 @@ public class ArchonPlayer extends RobotPlayer {
         } else if (roundNumber < 80
                 || (roundNumber > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.TURRET) < 3)) {
             // If there are no enemies, we do not need offensive yet
-            if (nearbyEnemies.length > 0) {
+//            if (nearbyEnemies.length > 0) {
                 return RobotType.TURRET;
-            } else {
-                return RobotType.TTM;
-            }
+//            } else {
+//                return RobotType.TTM;
+//            }
         } else if (roundNumber > 120 && Util.countRobotsByRobotType(nearbyAllies, RobotType.GUARD) < 2) {
             return RobotType.GUARD;
         } else if (roundNumber < 120) {
