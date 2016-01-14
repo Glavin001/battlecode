@@ -145,20 +145,16 @@ public class ScoutPlayer extends RobotPlayer {
                     switch (message.getTag()) {
                     // Handle Scout messages that about map bounds
                     case CommUtil.MessageTags.SMBN:
-                    case MessageTags.AMBN:
                         // Set map bounds
                         setMapBound(Direction.NORTH, message.getLocation().y);
                         break;
                     case MessageTags.SMBE:
-                    case MessageTags.AMBE:
                         setMapBound(Direction.EAST, message.getLocation().x);
                         break;
                     case MessageTags.SMBS:
-                    case MessageTags.AMBS:
                         setMapBound(Direction.SOUTH, message.getLocation().y);
                         break;
                     case MessageTags.SMBW:
-                    case MessageTags.AMBW:
                         setMapBound(Direction.WEST, message.getLocation().x);
                         break;
 
@@ -207,7 +203,8 @@ public class ScoutPlayer extends RobotPlayer {
             // Check known unit so we don't add duplicates
             boolean wasTooClose = false;
             for (DecayingMapLocation knownCluster : knowns) {
-                if (knownCluster.location.distanceSquaredTo(loc) > minClusterSeparation) {
+                int clusterSeparation = knownCluster.location.distanceSquaredTo(loc);
+                if (clusterSeparation < minClusterSeparation) {
                     wasTooClose = true;
                     // If it was a duplicate, go to next object and don't broadcast
                     return;
@@ -238,12 +235,17 @@ public class ScoutPlayer extends RobotPlayer {
                     case ZOMBIEDEN:
                         reportFixedRobot(MessageTags.ZDEN, robot, knownDens, distToNearestArchon);
                         break;
+                    case STANDARDZOMBIE:
+                    case BIGZOMBIE:
+                    case FASTZOMBIE:
+                    case RANGEDZOMBIE:
                     case SOLDIER:
                     case GUARD:
                     case VIPER:
                         threatLevel += 1;
                         averageEnemyX += robot.location.x;
                         averageEnemyY += robot.location.y;
+                        break;
                     default:
                         break;
                 }

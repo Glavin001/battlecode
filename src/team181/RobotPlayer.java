@@ -280,7 +280,8 @@ public class RobotPlayer {
                     Message message = new Message(signal);
                     MapLocation loc = signal.getLocation();
 
-                    switch(message.getTag()){
+                    int switchTag = processTag(message.getTag());
+                    switch(switchTag){
                         // Handle Scout messages about map bounds
                         case MessageTags.SMBN:
                             // Propagate the message to nearby scouts and archons
@@ -315,12 +316,36 @@ public class RobotPlayer {
             }
         }
         
+        // Use this to send messages that will not be relayed.
         public static void sendMessage(Message message, int radiusSquared) throws GameActionException{
             messagesSentThisRound++;
             if(messagesSentThisRound > GameConstants.MESSAGE_SIGNALS_PER_TURN){
-                System.out.println("ERROR: TOO MANY MESSAGES SENT THIS ROUND");
+                //System.out.println("ERROR: TOO MANY MESSAGES SENT THIS ROUND: " + Integer.toString(messagesSentThisRound) + " " + message.getTag());
             }else{
+                System.out.println("DEBUG: MESSAGES SENT THIS ROUND: " + Integer.toString(messagesSentThisRound) + " " + message.getTag() + " " + message.getLocation().toString());
                 message.send(rc, radiusSquared);
+            }
+        }
+        
+        // Use this to send messages that can be relayed.
+        public static void sendRelayableMessage(Message message, int radiusSquared) throws GameActionException{
+            message.setTag(message.getTag() + 1);
+            sendMessage(message, radiusSquared);
+        }
+        
+        // Implementation of relaying system
+        public static int processTag(int tag){
+            if(tag % 2 == 1){
+                tag--;
+            }
+            return tag;
+        }
+        
+        public static boolean isRelayable(int tag){
+            if(tag % 2 == 1){
+                return true;
+            }else{
+                return false;
             }
         }
         
