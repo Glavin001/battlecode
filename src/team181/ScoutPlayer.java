@@ -12,7 +12,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
-import battlecode.instrumenter.inject.System;
 import team181.CommUtil.MessageTags;
 import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
@@ -95,16 +94,16 @@ public class ScoutPlayer extends RobotPlayer {
             rc.setIndicatorString(2, "I am broadcasting map coordinates now.");
             // Send north bound
             Message message = new Message(MessageTags.SMBN, new MapLocation(rc.getLocation().x, northBound));
-            message.send(rc, distToNearestArchon);
+            Messaging.sendMessage(message, distToNearestArchon);
             // East
             message = new Message(MessageTags.SMBE, new MapLocation(eastBound, rc.getLocation().y));
-            message.send(rc, distToNearestArchon);
+            Messaging.sendMessage(message, distToNearestArchon);
             // South
             message = new Message(MessageTags.SMBS, new MapLocation(rc.getLocation().x, southBound));
-            message.send(rc, distToNearestArchon);
+            Messaging.sendMessage(message, distToNearestArchon);
             // West
             message = new Message(MessageTags.SMBW, new MapLocation(westBound, rc.getLocation().y));
-            message.send(rc, distToNearestArchon);
+            Messaging.sendMessage(message, distToNearestArchon);
         }
 
         public static void tryExplore() throws GameActionException {
@@ -181,17 +180,14 @@ public class ScoutPlayer extends RobotPlayer {
             for (MapLocation fixedUnit : knowns) {
                 if (fixedUnit.equals(loc)) {
                     wasDuplicate = true;
-                    continue;
+                    // If it was a duplicate, go to next object and don't broadcast
+                    return;
                 }
             }
-            // If it was a duplicate, go to next object and don't broadcast
-            if (wasDuplicate) {
-                return;
-            } else {
-                // Otherwise we are dealing with a new object.
-                knowns.add(loc);
-            }
-            message.send(rc, squaredRadius);
+            // Otherwise we are dealing with a new object.
+            rc.setIndicatorDot(loc, 255, 100, 255);
+            knowns.add(loc);
+            Messaging.sendMessage(message, squaredRadius);;
         }
         
         //Report Dens and neutrals
@@ -222,10 +218,11 @@ public class ScoutPlayer extends RobotPlayer {
             if(threatLevel > maxID){
                 threatLevel = maxID;
             }
+            rc.setIndicatorDot(loc, 80, 80, 255);
             DecayingMapLocation cluster = new DecayingMapLocation(loc, threatLevel);
             knowns.add(cluster);
             Message message = new Message(MessageTags.CLUS, cluster.location, cluster.ttl);
-            message.send(rc, squaredRadius);        
+            Messaging.sendMessage(message, squaredRadius);      
         }
 
         // Broadcasts a report on all nearby interesting objects.
@@ -275,7 +272,7 @@ public class ScoutPlayer extends RobotPlayer {
                     broadCastCooldown += incurredCooldownPerBroadcast;
                     int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
                     Message message = new Message(MessageTags.EARL, r.location, r.ID);
-                    message.send(rc, distToNearestArchon);
+                    Messaging.sendMessage(message, distToNearestArchon);
                     rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: " + r.location.toString());
                     break;
                 }

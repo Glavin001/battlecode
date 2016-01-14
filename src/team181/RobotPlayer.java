@@ -79,6 +79,7 @@ public class RobotPlayer {
     static boolean wbs = false;
     static boolean allBoundsSet = false;
     static int maxID = 16383;
+    static int messagesSentThisRound = 0;
 
     /**
      * Movement
@@ -292,6 +293,15 @@ public class RobotPlayer {
                 }
             }
         }
+        
+        public static void sendMessage(Message message, int radiusSquared) throws GameActionException{
+            messagesSentThisRound++;
+            if(messagesSentThisRound > GameConstants.MESSAGE_SIGNALS_PER_TURN){
+                System.out.println("ERROR: TOO MANY MESSAGES SENT THIS ROUND");
+            }else{
+                message.send(rc, radiusSquared);
+            }
+        }
 
     }
 
@@ -417,7 +427,9 @@ public class RobotPlayer {
         while (true) {
             try {
                 Debug.emptyIndicatorStrings();
+                updateDecays();
                 Sensing.updateNearbyEnemies();
+                messagesSentThisRound = 0;
                 if (nearestEnemyArchon != null) {
                     rc.setIndicatorString(3, "Enemy Archon @ "+nearestEnemyArchon.toString());
 //                    System.out.println("Enemy archon @ "+nearestEnemyArchon.toString());
@@ -469,6 +481,14 @@ public class RobotPlayer {
      */
     public static void tick() throws GameActionException {
         System.out.println("Subclasses should implement their own tick method");
+    }
+    
+    public static void updateDecays(){
+        for(DecayingMapLocation dloc : knownEnemyClusters){
+            if(dloc.ttl > 0){
+                dloc.ttl--;
+            }
+        }
     }
 
     /**
