@@ -95,16 +95,16 @@ public class ScoutPlayer extends RobotPlayer {
         public static void broadcastMapBounds() throws GameActionException {
             int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
             rc.setIndicatorString(2, "I am broadcasting map coordinates now.");
-            //Send north bound
+            // Send north bound
             Message message = new Message(MessageTags.SMBN, new MapLocation(rc.getLocation().x, northBound));
             message.send(rc, distToNearestArchon);
-            //East
+            // East
             message = new Message(MessageTags.SMBE, new MapLocation(eastBound, rc.getLocation().y));
             message.send(rc, distToNearestArchon);
-            //South
+            // South
             message = new Message(MessageTags.SMBS, new MapLocation(rc.getLocation().x, southBound));
             message.send(rc, distToNearestArchon);
-            //West
+            // West
             message = new Message(MessageTags.SMBW, new MapLocation(westBound, rc.getLocation().y));
             message.send(rc, distToNearestArchon);
         }
@@ -130,7 +130,7 @@ public class ScoutPlayer extends RobotPlayer {
                 haveBroadCastedMapBounds = true;
             } else {
                 explore(Movement.randomDirection());
-//                explore(myLocation.directionTo(nearestArchon).opposite());
+                // explore(myLocation.directionTo(nearestArchon).opposite());
             }
         }
     }
@@ -197,7 +197,8 @@ public class ScoutPlayer extends RobotPlayer {
                 }
                 Message message = new Message(MessageTags.ZDEN, robot.location, robot.ID);
                 message.send(rc, distToNearestArchon);
-//                rc.setIndicatorString(2, "I transmitted denLocation this turn");
+                // rc.setIndicatorString(2, "I transmitted denLocation this
+                // turn");
             }
         }
     }
@@ -207,20 +208,20 @@ public class ScoutPlayer extends RobotPlayer {
         if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {
-                    broadCastCooldown += incurredCooldownPerBroadcast ;
+                    broadCastCooldown += incurredCooldownPerBroadcast;
                     int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
                     Message message = new Message(MessageTags.EARL, r.location, r.ID);
                     message.send(rc, distToNearestArchon);
-                    rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: "+r.location.toString());
+                    rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: " + r.location.toString());
                     break;
                 }
             }
         } else if (broadCastCooldown > 0) {
-            broadCastCooldown--; 
+            broadCastCooldown--;
         }
 
         Exploration.tryExplore();
-        
+
         // If we have found every bound
         if (numExploredDirections == 4 || allBoundsSet == true) {
             reportDens();
