@@ -72,7 +72,7 @@ public class Message {
         return loc;
     }
      
-    //Use this instead of broadcastMessageSignal
+    // Don't use this!!! use Messaging.sendMessage() instead. 
     public void send(RobotController rc, int radiusSquared) throws GameActionException{
         rc.broadcastMessageSignal(part1, part2, radiusSquared);
     }

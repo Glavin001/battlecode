@@ -6,6 +6,8 @@ import team181.RobotPlayer.Debug;
 import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Movement;
 import team181.RobotPlayer.Sensing;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -30,11 +32,17 @@ public class RobotPlayer {
     static MapLocation myLocation;
     static RobotInfo[] nearbyEnemies;
     static RobotInfo[] nearbyTraitors;
+    static RobotInfo[] nearbyNeutrals;
     static RobotInfo[] nearbyAllies;
     static RobotInfo[] veryCloseAllies;
     static RobotInfo[] attackableZombies;
     static RobotInfo[] attackableTraitors;
     static RobotInfo[] attackableEnemies;
+    static MapLocation[] nearbyParts;    
+    static ArrayList<MapLocation> knownDens = new ArrayList<MapLocation>();
+    static ArrayList<MapLocation> knownNeutrals = new ArrayList<MapLocation>();
+    static ArrayList<MapLocation> knownParts = new ArrayList<MapLocation>();
+    static ArrayList<DecayingMapLocation> knownEnemyClusters = new ArrayList<DecayingMapLocation>();
     static Random rand;
     static int myAttackRange;
     static Team myTeam;
@@ -70,7 +78,8 @@ public class RobotPlayer {
     static boolean sbs = false;
     static boolean wbs = false;
     static boolean allBoundsSet = false;
-    static int maxID = 32000;
+    static int maxID = 16383;
+    static int messagesSentThisRound = 0;
 
     /**
      * Movement
@@ -284,12 +293,23 @@ public class RobotPlayer {
                 }
             }
         }
+        
+        public static void sendMessage(Message message, int radiusSquared) throws GameActionException{
+            messagesSentThisRound++;
+            if(messagesSentThisRound > GameConstants.MESSAGE_SIGNALS_PER_TURN){
+                System.out.println("ERROR: TOO MANY MESSAGES SENT THIS ROUND");
+            }else{
+                message.send(rc, radiusSquared);
+            }
+        }
 
     }
 
     static class Sensing {
         public static void updateNearbyEnemies() {
             myLocation = rc.getLocation();
+            nearbyNeutrals = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, Team.NEUTRAL);
+            nearbyParts = rc.sensePartLocations(myRobotType.sensorRadiusSquared);
             nearbyEnemies = rc.senseHostileRobots(myLocation, myRobotType.sensorRadiusSquared);
             nearbyTraitors = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, enemyTeam);
             nearbyAllies = rc.senseNearbyRobots(myRobotType.sensorRadiusSquared, myTeam);
@@ -407,7 +427,9 @@ public class RobotPlayer {
         while (true) {
             try {
                 Debug.emptyIndicatorStrings();
+                updateDecays();
                 Sensing.updateNearbyEnemies();
+                messagesSentThisRound = 0;
                 if (nearestEnemyArchon != null) {
                     rc.setIndicatorString(3, "Enemy Archon @ "+nearestEnemyArchon.toString());
 //                    System.out.println("Enemy archon @ "+nearestEnemyArchon.toString());
@@ -459,6 +481,14 @@ public class RobotPlayer {
      */
     public static void tick() throws GameActionException {
         System.out.println("Subclasses should implement their own tick method");
+    }
+    
+    public static void updateDecays(){
+        for(DecayingMapLocation dloc : knownEnemyClusters){
+            if(dloc.ttl > 0){
+                dloc.ttl--;
+            }
+        }
     }
 
     /**
