@@ -3,7 +3,9 @@ package team181;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
+import team181.RobotPlayer.Messaging;
 import team181.RobotPlayer.Sensing;
 
 /**
@@ -12,10 +14,17 @@ import team181.RobotPlayer.Sensing;
  */
 public class TurretPlayer extends RobotPlayer {
 
+    protected static int minArchonDistSquared = 4;
+    protected static int maxArchonDistSquared = RobotType.TURRET.sensorRadiusSquared - 1;
+
     public static void tick() throws GameActionException {
+        Messaging.handleMessageQueue();
+        // Update robot type
+        myRobotType = rc.getType();
+
         // If this robot type can attack, check for enemies within range
         // and attack one
-        if (rc.isWeaponReady()) {
+        if (myRobotType.equals(RobotType.TURRET) && rc.isWeaponReady()) {
             if (attackableTraitors.length > 0) {
                 RobotInfo enemy = bestRobotToAttack(attackableTraitors);
                 // Check whether the enemy is in a valid attack
@@ -40,6 +49,67 @@ public class TurretPlayer extends RobotPlayer {
         } else {
             rc.setIndicatorString(2, "Weapon not ready");
         }
+
+        // Not currently attacking
+        if (nearbyEnemies.length == 0) {
+            // No enemies nearby!
+            // Can I move to nearest ally archon?
+            if (nearestArchon != null) {
+                // I know where he is!
+                // Is he close?
+                rc.setIndicatorLine(myLocation, nearestArchon, 0, 0, 255);
+                int dist = myLocation.distanceSquaredTo(nearestArchon);
+                if (dist > maxArchonDistSquared) {
+                    // Too far! Let's move closer
+                    rc.setIndicatorString(2, "Too far from Ally Archon");
+                    // Can we move?
+                    if (myRobotType.equals(RobotType.TURRET)) {
+                        // Nope, can't move
+                        rc.pack();
+                        return;
+                    } else {
+                        // Yup, we can move
+                        // Move closer!
+                        explore(myLocation.directionTo(nearestArchon));
+                        return;
+                    }
+                } else if (dist < minArchonDistSquared) {
+                    // too close! Give the archon some space!
+                    rc.setIndicatorString(2, "Too close to Ally Archon");
+                    // Can we move?
+                    if (myRobotType.equals(RobotType.TURRET)) {
+                        // Nope, can't move
+                        rc.pack();
+                        return;
+                    } else {
+                        // Yup, we can move
+                        // Move away!
+                        explore(myLocation.directionTo(nearestArchon).opposite());
+                        return;
+                    }
+                } else {
+                    // All good
+                    // Are we ready to attack?
+                    if (myRobotType.equals(RobotType.TTM)) {
+                        // Nope, need to unpack
+                        rc.unpack();
+                        return;
+                    } else {
+                        // Ready to kick some butt!
+                    }
+                }
+
+            }
+        } else {
+            // Enemies!
+            // Are we ready to attack?
+            if (myRobotType.equals(RobotType.TTM)) {
+                // Nope, we need to unpack
+                rc.unpack();
+                return;
+            }
+        }
+
     }
 
 }
