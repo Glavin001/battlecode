@@ -105,7 +105,7 @@ public class ScoutPlayer extends RobotPlayer {
             Messaging.sendMessage(message, distToNearestArchon);
         }
 
-        public static void tryExplore() throws GameActionException {
+        public static boolean tryExplore() throws GameActionException {
             // If we have not found every bound
             if (numExploredDirections != 4 && allBoundsSet != true) {
                 // If we don't already have a bound for this direction
@@ -118,16 +118,17 @@ public class ScoutPlayer extends RobotPlayer {
                         currentExploreDirection = cardinals[numExploredDirections % 4];
                         // Otherwise go explore in that direction.
                     } else {
-                        explore(currentExploreDirection);
+                        return explore(currentExploreDirection);
                     }
                 }
             } else if (!haveBroadCastedMapBounds) {
                 broadcastMapBounds();
                 haveBroadCastedMapBounds = true;
             } else {
-                explore(Movement.randomDirection());
+                return explore(Movement.randomDirection());
                 // explore(myLocation.directionTo(nearestArchon).opposite());
             }
+            return false;
         }
     }
 

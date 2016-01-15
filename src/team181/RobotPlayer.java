@@ -112,19 +112,24 @@ public class RobotPlayer {
                 Direction dirToMove;
                 for (int i = 0; i < 8; i++) {
                     dirToMove = directions[(fate + i) % 8];
-                    if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
-                        // Too much rubble, so I should clear it
-                        rc.clearRubble(dirToMove);
-                        return true;
-                        // Check if I can move in this direction
-                    } else if (rc.canMove(dirToMove)) {
-                        // Move
-                        rc.move(dirToMove);
-                        return true;
-                    }
+                    return Movement.moveOrClear(dirToMove);
                 }
             } else {
                 // rc.setIndicatorString(0, "I could not move this turn");
+            }
+            return false;
+        }
+        
+        public static boolean moveOrClear(Direction dirToMove) throws GameActionException {
+            if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+                // Too much rubble, so I should clear it
+                rc.clearRubble(dirToMove);
+                return true;
+                // Check if I can move in this direction
+            } else if (rc.canMove(dirToMove)) {
+                // Move
+                rc.move(dirToMove);
+                return true;
             }
             return false;
         }
@@ -144,6 +149,7 @@ public class RobotPlayer {
                         // Move
                         MapLocation newLocation = myLocation.add(dirToMove);
                         if (nearestArchon != null) {
+                            rc.setIndicatorLine(myLocation, nearestArchon, 0, 100, 100);
                             int distance = (newLocation.x - nearestArchon.x) * (newLocation.x - nearestArchon.x) + 
                                     (newLocation.y - nearestArchon.y) * (newLocation.y - nearestArchon.y);
                             if (distance >= squaredMin && distance <= squaredMax) {
@@ -542,6 +548,7 @@ public class RobotPlayer {
                 updateDecays();
                 Debug.displayClusters();
                 Sensing.updateNearbyEnemies();
+                
                 messagesSentThisRound = 0;
                 if (nearestEnemyArchon != null) {
                     rc.setIndicatorString(3, "Enemy Archon @ "+nearestEnemyArchon.toString());
@@ -673,38 +680,22 @@ public class RobotPlayer {
     public static double attackRisk(MapLocation loc) {
         if (nearbyEnemies.length > 0) {
             double totalRisk = 0.0;
-            int len = nearbyEnemies.length;
-            for (int i=0; i<len; i++) {
+            // Enemy attack potential
+            int elen = nearbyEnemies.length;
+            for (int i=0; i<elen; i++) {
                 RobotInfo r = nearbyEnemies[i];
-                // Ignore Neutral robots
-                if (r.team.equals(Team.NEUTRAL)) {
-                    break;
-                }
-                // Ignore Archons
-                if (r.type.equals(RobotType.ARCHON)) {
-                    break;
-                }
-                // Ignore TTM
-                if (r.type.equals(RobotType.TTM)) {
-                    break;
-                }
-                MapLocation enemyLoc = r.location;
-                RobotType enemyType = r.type;
-                int distAway = loc.distanceSquaredTo(enemyLoc);
-                int offsetBlocks = 2;
-                int offsetSquared = offsetBlocks * offsetBlocks;
-                int safeDist = (enemyType.attackRadiusSquared + offsetSquared);
-                if (enemyType.equals(RobotType.TURRET)) {
-                    safeDist = RobotType.TURRET.sensorRadiusSquared + offsetSquared;
-                }
-                if (distAway <= safeDist) {
-                    // If enemy has 0 attack power then risk = 0
-                    // If Core delay is 0 then risk = numerator, and will be
-                    // divided by each turn/core delay
-                    double risk = (safeDist - distAway) * scoreRobot(r);
-                    totalRisk += risk;
-                }
+                totalRisk += attackRisk(loc, r);
             }
+            // Allied assistance attack potential
+            // Ally attack potential
+            int alen = nearbyAllies.length;
+            for (int i=0; i<alen; i++) {
+                RobotInfo r = nearbyAllies[i];
+                totalRisk -= attackRisk(loc, r);
+            }
+            // Rubble protection
+            totalRisk -= rubbleCover(loc) * 0.1;
+
             // rc.setIndicatorString(2, "Risk this turn is: " +
             // Double.toString(totalRisk));
 //            System.out.println(
@@ -713,6 +704,66 @@ public class RobotPlayer {
         } else {
             return 0.0;
         }
+    }
+    
+    /**
+     * Additional distance from attack radius to be considered safe.
+     * Used in attackRisk calculation.
+     */
+    public static int safeDistFromAttackOffsetSquared = 4;
+    /**
+     * 
+     * @param r robot
+     * @return Total attack risk for robot
+     */
+    public static double attackRisk(MapLocation loc, RobotInfo r) {
+        // Ignore Neutral robots
+        if (r.team.equals(Team.NEUTRAL)) {
+            return 0.0;
+        }
+        // Ignore Archons
+        if (r.type.equals(RobotType.ARCHON)) {
+            return 0.0;
+        }
+        // Ignore Scouts
+        if (r.type.equals(RobotType.SCOUT)) {
+            return 0.0;
+        }
+        // Ignore TTM
+        if (r.type.equals(RobotType.TTM)) {
+            return 0.0;
+        }
+        MapLocation enemyLoc = r.location;
+        RobotType enemyType = r.type;
+        int distAway = loc.distanceSquaredTo(enemyLoc);
+        int safeDist = (enemyType.attackRadiusSquared + safeDistFromAttackOffsetSquared);
+        if (enemyType.equals(RobotType.TURRET)) {
+            safeDist = RobotType.TURRET.sensorRadiusSquared + safeDistFromAttackOffsetSquared;
+        }
+        if (distAway <= safeDist) {
+            // If enemy has 0 attack power then risk = 0
+            // If Core delay is 0 then risk = numerator, and will be
+            // divided by each turn/core delay
+            return (safeDist - distAway) * scoreRobot(r);
+        }
+        return 0.0;
+    }
+    
+    public static double rubbleCover(MapLocation loc) {
+        double totalRubble = 0;
+        for (Direction dir : directions) {
+            double rubble = rc.senseRubble(loc.add(dir));
+            double bonus = 1.0;
+            if (rubble >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
+                // They cannot move through it
+                // Count turns to clear
+                // How long until they could move?
+                double turnsToMove = Util.turnsToClearRubbleToMove(rubble);
+                rubble *= turnsToMove;
+            }
+            totalRubble += rubble * bonus * GameConstants.RUBBLE_SLOW_THRESH;
+        }
+        return totalRubble;
     }
     
     /**
@@ -765,15 +816,32 @@ public class RobotPlayer {
     }
     
     /**
-     * Determine the best direction while considering risk of each direction
+     * Determine the best direction robot *can* move while considering risk of each direction
+     * 
+     * Will return Direction.NONE if either no move should be made or there are no moves to be made.
      * 
      * @param idealDir Ideal direction, if all things equal
      * @return The best direction
      */
     public static Direction leastRiskyDirection(Direction idealDir) {
+        return leastRiskyDirection(idealDir, false);
+    }
+    
+    /**
+     * Determine the best direction robot can move or should clear rubble, while considering risk of each direction
+     * 
+     * Will return Direction.NONE if either no move should be made or there are no moves to be made.
+     * 
+     * Note: Scouts will exclude considering rubble
+     * 
+     * @param idealDir Ideal direction, if all things equal
+     * @param allowClearingRubble TODO: Allowing direction to have rubble that must be cleared first before moving
+     * @return The best direction to move or clear
+     */
+    public static Direction leastRiskyDirection(Direction idealDir, boolean allowClearingRubble) {
         // There are enemies within sight!
         // Calculate least risking direction to move
-        double leastRisk = Double.MAX_VALUE; // risks[0];
+        double leastRisk = attackRisk(myLocation);
         Direction leastRiskyDirection = Direction.NONE;
         Direction[] allDirs = Direction.values();
         MapLocation goalLoc = myLocation.add(idealDir);
@@ -782,14 +850,14 @@ public class RobotPlayer {
         for (int i = 0; i < allDirs.length; i++) {
             // Check if can move in this direction
             Direction currDir = allDirs[i];
-            if (rc.canMove(currDir)) {
+            MapLocation nextLoc = myLocation.add(currDir);
+            if (rc.canMove(currDir) || (allowClearingRubble && rc.senseRubble(nextLoc) > GameConstants.RUBBLE_OBSTRUCTION_THRESH)) {
                 // Can move in this direction
                 // Check attack risk value
-                MapLocation nextLoc = myLocation.add(currDir);
                 double risk = attackRisk(nextLoc);
                 risks[i] = risk;
                 if (risk != 0.0) {
-                    rc.setIndicatorDot(nextLoc, (int) Math.min(255, risk), 0, 0);
+                    rc.setIndicatorDot(nextLoc, (int) ((risk >= 0) ? Math.min(255, risk) : 0), (int) ((risk < 0) ? Math.min(255, -risk) : 0), 0);
                 }
                 // System.out.println("At location" +
                 // currLoc.toString() + " risk in direction " +
@@ -830,26 +898,30 @@ public class RobotPlayer {
      *      
      * @param dirToMove The preferred direction to move, if all things equal
      * @throws GameActionException An exception throw from the game
+     * @return Whether we did move
      */
-     public static void explore(Direction dirToMove) throws GameActionException {
+     public static boolean explore(Direction dirToMove) throws GameActionException {
         if (rc.isCoreReady()) {
             if (nearbyEnemies.length == 0) {
                 // There are no known enemy threats
                 if (rc.canMove(dirToMove)) {
                     rc.move(dirToMove);
+                    return true;
                 } else if (rc.canMove(dirToMove.rotateLeft())) {
                     rc.move(dirToMove.rotateLeft());
+                    return true;
                 } else if (rc.canMove(dirToMove.rotateRight())) {
                     rc.move(dirToMove.rotateRight());
+                    return true;
                 }
             } else {
                 Direction bestDir = leastRiskyDirection(dirToMove);
                 if (!bestDir.equals(Direction.NONE)) {
-                    rc.move(bestDir);
+                    return Movement.moveOrClear(bestDir);
                 }
             }
         }
+        return false;
     }
-
 
 }

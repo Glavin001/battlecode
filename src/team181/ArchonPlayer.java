@@ -277,10 +277,9 @@ public class ArchonPlayer extends RobotPlayer {
                 // Determine best part
                 MapLocation loc = bestLocationForParts(partLocations);
                 Direction dirToMove = myLocation.directionTo(loc);
-                Direction bestDir = leastRiskyDirection(dirToMove);
+                Direction bestDir = leastRiskyDirection(dirToMove, true);
                 if (!bestDir.equals(Direction.NONE)) {
-                    rc.move(bestDir);
-                    return true;
+                    return Movement.moveOrClear(bestDir);
                 }
             }
         }
