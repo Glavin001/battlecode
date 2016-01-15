@@ -30,6 +30,19 @@ public class RobotPlayer {
             RobotType.GUARD, RobotType.GUARD, RobotType.VIPER, RobotType.TURRET };*/
 
     static MapLocation myLocation;
+    /**
+     * Current health of robot
+     */
+    static double myHealth = 0.0;
+    /**
+     * Used internally, do not use.
+     */
+    static double prevHealth = 0.0;
+    /**
+     * Whether the robot was attacked in previous turn
+     * Updates every turn.
+     */
+    static boolean wasAttacked = false;
     static RobotInfo[] nearbyEnemies;
     static RobotInfo[] nearbyTraitors;
     static RobotInfo[] nearbyNeutrals;
@@ -536,6 +549,16 @@ public class RobotPlayer {
                 } else {
 //                    System.out.println("Unknown enemy archon location");
                 }
+                
+                // Check if health has decreased
+                myHealth = rc.getHealth();
+                if (prevHealth != 0.0 && prevHealth < myHealth) {
+                    wasAttacked = true;
+                } else {
+                    wasAttacked = false;
+                }
+                prevHealth = myHealth;
+                
                 switch (myRobotType) {
                     case ARCHON:
                         ArchonPlayer.tick();
