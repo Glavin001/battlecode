@@ -187,6 +187,25 @@ public class ArchonPlayer extends RobotPlayer {
                 return;
             }
         }
+        
+
+        // Move to closest neutrals
+        if (neutralRobots.length > 0 && rc.isCoreReady()) {
+            RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
+            MapLocation loc = neutralRobot.location;
+            Direction dirToMove = myLocation.directionTo(loc);
+            rc.setIndicatorLine(myLocation, loc, 0, 100, 100);
+            Movement.moveOrClear(dirToMove);
+            Direction bestDir = leastRiskyDirection(dirToMove);
+//            if (!bestDir.equals(Direction.NONE)) {
+//                rc.move(bestDir);
+                rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
+                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
+//                return;
+//            } else {
+//                rc.setIndicatorString(1, "Not moving towards neutral: " + Integer.toString(neutralRobot.ID));
+//            }
+        }
 
         // Building
         if (Building.tryBuildUnit(nextRobotTypeToBuild())) {
@@ -220,25 +239,11 @@ public class ArchonPlayer extends RobotPlayer {
             return;
         }
 
-        if (neutralRobots.length > 0 && rc.isCoreReady()) {
-            // Move to closest
-            RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
-            MapLocation loc = neutralRobot.location;
-            Direction dirToMove = myLocation.directionTo(loc);
-            Direction bestDir = leastRiskyDirection(dirToMove);
-            if (!bestDir.equals(Direction.NONE)) {
-                rc.move(bestDir);
-                rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
-                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
-                return;
-            }
-        }
-
         // Move randomly!
         // Movement.randomMove();
 
     }
-
+    
     /**
      * Determine what robot to build next
      * 

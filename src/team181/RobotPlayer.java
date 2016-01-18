@@ -736,6 +736,10 @@ public class RobotPlayer {
         if (r.type.equals(RobotType.TTM)) {
             return 0.0;
         }
+        // Ignore zombie Den
+        if (r.type.equals(RobotType.ZOMBIEDEN)) {
+            return 0.0;
+        }
         MapLocation enemyLoc = r.location;
         RobotType enemyType = r.type;
         int distAway = loc.distanceSquaredTo(enemyLoc);
