@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import battlecode.common.*;
+import team181.ViperPlayer;
 
 public class RobotPlayerTest {
 
