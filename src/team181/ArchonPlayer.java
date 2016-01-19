@@ -33,6 +33,9 @@ public class ArchonPlayer extends RobotPlayer {
     // What was the last message the scout sent?
     static Map<Integer, Integer> lastTransmissionID;
 
+    static MapLocation baseLocation;
+    static boolean moveToBase = false;
+    
     static class ArchonMessaging {
 
         /**
@@ -164,6 +167,17 @@ public class ArchonPlayer extends RobotPlayer {
     public static void initialize() {
         waitingMessageID = new HashMap<Integer, Boolean>();
         lastTransmissionID = new HashMap<Integer, Integer>();
+        
+        // Get base location
+        baseLocation = rc.getInitialArchonLocations(myTeam)[0];
+        myLocation = rc.getLocation();
+        if (myLocation.equals(baseLocation)) {
+            // Is at base
+            moveToBase = false;
+        } else {
+            // Isn't at base
+            moveToBase = true;
+        }
     }
 
     public static void tick() throws GameActionException {
@@ -182,7 +196,7 @@ public class ArchonPlayer extends RobotPlayer {
             rc.setIndicatorDot(loc, 180, 80, 180);
         }
         
-        System.out.println("Number of known neutrals: " + Integer.toString(knownNeutrals.size()));
+//        System.out.println("Number of known neutrals: " + Integer.toString(knownNeutrals.size()));
         for(MapLocation loc : knownParts){
             rc.setIndicatorDot(loc, 80, 180, 80);
         }
@@ -196,6 +210,17 @@ public class ArchonPlayer extends RobotPlayer {
         RobotInfo[] neutralRobots = rc.senseNearbyRobots(-1, Team.NEUTRAL);
         if (neutralRobots.length > 0) {
             activateNeutrals(neutralRobots);
+        }
+        
+        // Moving to base!
+        if (moveToBase && rc.isCoreReady()) {
+            // Check if already there!
+            if (myLocation.distanceSquaredTo(baseLocation) <= 4) {
+                // We are home!
+                moveToBase = false;
+            } else {
+                Movement.moveOrClear(myLocation.directionTo(baseLocation));
+            }
         }
         
         // Building
