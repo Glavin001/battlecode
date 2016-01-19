@@ -277,27 +277,31 @@ public class ScoutPlayer extends RobotPlayer {
             currentBoundaryCooldown--;
         }
         
-        //Broadcast enemy archon
-        if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
-            for (RobotInfo r : nearbyEnemies) {
-                if (r.type.equals(RobotType.ARCHON)) {
-                    broadCastCooldown += incurredCooldownPerBroadcast;
-                    int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
-                    Message message = new Message(MessageTags.EARL, r.location, r.ID);
-                    Messaging.sendMessage(message, distToNearestArchon);
-                    rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: " + r.location.toString());
-                    break;
-                }
-            }
-        } else if (broadCastCooldown > 0) {
-            broadCastCooldown--;
-        }
 
         Exploration.tryExplore();
 
 
         if(safeToBroadcast()){
+            
+            rc.setIndicatorString(1, "I am safe to broadcast this turn.");
+            
             ScoutReporting.report();
+            
+            //Broadcast enemy archon
+            if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
+                for (RobotInfo r : nearbyEnemies) {
+                    if (r.type.equals(RobotType.ARCHON)) {
+                        broadCastCooldown += incurredCooldownPerBroadcast;
+                        int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
+                        Message message = new Message(MessageTags.EARL, r.location, r.ID);
+                        Messaging.sendMessage(message, distToNearestArchon);
+                        rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: " + r.location.toString());
+                        break;
+                    }
+                }
+            } else if (broadCastCooldown > 0) {
+                broadCastCooldown--;
+            }
         }
 
     }

@@ -128,16 +128,16 @@ public class RobotPlayer {
         }
         
         public static boolean moveOrClear(Direction dirToMove) throws GameActionException {
-            if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+            if (rc.canMove(dirToMove)) {
+                // Move
+                rc.move(dirToMove);
+                return true;
+            } else if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
                 // Too much rubble, so I should clear it
                 rc.clearRubble(dirToMove);
                 return true;
                 // Check if I can move in this direction
-            } else if (rc.canMove(dirToMove)) {
-                // Move
-                rc.move(dirToMove);
-                return true;
-            }
+            } else 
             return false;
         }
         
@@ -1030,7 +1030,9 @@ public class RobotPlayer {
                 }
             } 
             else {
+                //rc.setIndicatorString(1, "The core delay before is : " + rc.getCoreDelay());
                 Direction bestDir = leastRiskyDirection(dirToMove);
+                //rc.setIndicatorString(2, "The core delay after is : " + rc.getCoreDelay());
                 if (!bestDir.equals(Direction.NONE)) {
                     return Movement.moveOrClear(bestDir);
                 }
