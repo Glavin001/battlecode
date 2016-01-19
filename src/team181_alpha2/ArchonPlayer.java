@@ -1,4 +1,4 @@
-package team181;
+package team181_alpha2;
 
 import battlecode.common.Clock;
 import battlecode.common.Direction;
@@ -8,8 +8,8 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
-import team181.CommUtil.MessageTags;
-import team181.RobotPlayer.Messaging;
+import team181_alpha2.CommUtil.MessageTags;
+import team181_alpha2.RobotPlayer.Messaging;
 
 import java.util.Map;
 
@@ -127,7 +127,7 @@ public class ArchonPlayer extends RobotPlayer {
                             Messaging.sendMessage(message, broadcastDistance);
                             if (nearestEnemyArchon != null) {
                                 // Broadcast where enemy archon is
-                                message = new Message(MessageTags.EARL, nearestEnemyArchon);
+                                message = new Message(MessageTags.EARL, nearestArchon);
                                 Messaging.sendMessage(message, broadcastDistance);
                                 // System.out.println("Broadcasting enemy
                                 // archon: "+nearestEnemyArchon.toString());
@@ -183,29 +183,15 @@ public class ArchonPlayer extends RobotPlayer {
         // Activating Neutrals
         RobotInfo[] neutralRobots = rc.senseNearbyRobots(-1, Team.NEUTRAL);
         if (neutralRobots.length > 0) {
-            activateNeutrals(neutralRobots);
-        }
-        
-        // Move to closest neutrals
-        if (neutralRobots.length > 0 && rc.isCoreReady()) {
-            RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
-            MapLocation loc = neutralRobot.location;
-            Direction dirToMove = myLocation.directionTo(loc);
-            rc.setIndicatorLine(myLocation, loc, 0, 100, 100);
-            Movement.moveOrClear(dirToMove);
-            Direction bestDir = leastRiskyDirection(dirToMove);
-//            if (!bestDir.equals(Direction.NONE)) {
-//                rc.move(bestDir);
-                rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
-                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
-//                return;
-//            } else {
-//                rc.setIndicatorString(1, "Not moving towards neutral: " + Integer.toString(neutralRobot.ID));
-//            }
+            if (activateNeutrals(neutralRobots)) {
+                return;
+            }
         }
 
         // Building
-        Building.tryBuildUnit(nextRobotTypeToBuild());
+        if (Building.tryBuildUnit(nextRobotTypeToBuild())) {
+            return;
+        }
 
         // Survival
         if (shouldFlee()) {
@@ -220,20 +206,39 @@ public class ArchonPlayer extends RobotPlayer {
                 Direction bestDir = leastRiskyDirection(dirToMove);
                 if (!bestDir.equals(Direction.NONE)) {
                     rc.move(bestDir);
+                    return;
                 }
             }
         }
 
         // Repairing
-        repairAllies(nearbyAllies);
+        if (repairAllies(nearbyAllies)) {
+            return;
+        }
         // Pick up Parts
-        retrieveParts();
+        if (retrieveParts()) {
+            return;
+        }
+
+        if (neutralRobots.length > 0 && rc.isCoreReady()) {
+            // Move to closest
+            RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
+            MapLocation loc = neutralRobot.location;
+            Direction dirToMove = myLocation.directionTo(loc);
+            Direction bestDir = leastRiskyDirection(dirToMove);
+            if (!bestDir.equals(Direction.NONE)) {
+                rc.move(bestDir);
+                rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
+                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
+                return;
+            }
+        }
 
         // Move randomly!
         // Movement.randomMove();
 
     }
-    
+
     /**
      * Determine what robot to build next
      * 

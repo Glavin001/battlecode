@@ -1,11 +1,11 @@
-package team181;
+package team181_alpha2;
 
 import battlecode.common.*;
-import team181.CommUtil.MessageTags;
-import team181.RobotPlayer.Debug;
-import team181.RobotPlayer.Messaging;
-import team181.RobotPlayer.Movement;
-import team181.RobotPlayer.Sensing;
+import team181_alpha2.CommUtil.MessageTags;
+import team181_alpha2.RobotPlayer.Debug;
+import team181_alpha2.RobotPlayer.Messaging;
+import team181_alpha2.RobotPlayer.Movement;
+import team181_alpha2.RobotPlayer.Sensing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +64,7 @@ public class RobotPlayer {
     /**
      * Nearest ally archon
      */
-    static MapLocation nearestAllyArchon;
+    static MapLocation nearestArchon;
     /**
      * Nearest enemy archon
      */
@@ -95,10 +95,6 @@ public class RobotPlayer {
     static int messagesSentThisRound = 0;
     static int minClusterSeparation = 15*15; 
     static int clusterExpiry = 10;
-    static int currentExploreCooldown = 0;
-    static int baseExploreCooldown = 40; // Explore for 40 rounds
-    static int currentBoundaryCooldown = 0; 
-    static int baseBoundaryCooldown = 10; // Allow scouts 10 turns to get away from the wall
 
     /**
      * Movement
@@ -112,7 +108,6 @@ public class RobotPlayer {
         }
 
         public static boolean randomMove() throws GameActionException {
-            System.out.println("DEPRECATED: randomMove is deprecated. Please use something else, such as moveToClosestEnemyArchon, etc.");
             int fate = rand.nextInt(8);
             if (rc.isCoreReady()) {
                 Direction dirToMove;
@@ -154,10 +149,10 @@ public class RobotPlayer {
                     } else if (rc.canMove(dirToMove)) {
                         // Move
                         MapLocation newLocation = myLocation.add(dirToMove);
-                        if (nearestAllyArchon != null) {
-                            rc.setIndicatorLine(myLocation, nearestAllyArchon, 0, 100, 100);
-                            int distance = (newLocation.x - nearestAllyArchon.x) * (newLocation.x - nearestAllyArchon.x) + 
-                                    (newLocation.y - nearestAllyArchon.y) * (newLocation.y - nearestAllyArchon.y);
+                        if (nearestArchon != null) {
+                            rc.setIndicatorLine(myLocation, nearestArchon, 0, 100, 100);
+                            int distance = (newLocation.x - nearestArchon.x) * (newLocation.x - nearestArchon.x) + 
+                                    (newLocation.y - nearestArchon.y) * (newLocation.y - nearestArchon.y);
                             if (distance >= squaredMin && distance <= squaredMax) {
                                 rc.move(dirToMove);
                                 return;
@@ -165,37 +160,12 @@ public class RobotPlayer {
                         }
                     }
                 }
-                if (nearestAllyArchon != null) {
+                if (nearestArchon != null) {
                     retreatToArchon();
                 }
             } else {
                 // rc.setIndicatorString(0, "I could not move this turn");
             }
-        }
-        
-        /**
-         * Move robot around a center location with a minimum and maximum distance
-         * @param center Center location
-         * @param minDist Minimum distance squared from center
-         * @param maxDist Maximum distance squared from center
-         * @return Whether robot moved or not
-         * @throws GameActionException 
-         */
-        public static boolean moveAroundLocation(MapLocation center, int minDist, int maxDist) throws GameActionException {
-            // Move about enemies
-            if (rc.isCoreReady()) {
-                int dist = myLocation.distanceSquaredTo(center);
-                if (dist > maxDist) {
-                    // Move closer!
-                    rc.setIndicatorString(2, "Moving closer to: " + center.toString());
-                    moveOrClear(myLocation.directionTo(center));
-                } else {
-                    // Move away!
-                    rc.setIndicatorString(2, "Moving away from: " + center.toString());
-                    moveOrClear(myLocation.directionTo(center).opposite());
-                }
-            }
-            return false;
         }
         
         private static MapLocation getNewSpotToMove(Direction direction) {
@@ -206,8 +176,8 @@ public class RobotPlayer {
         }
 
         public static boolean retreatToArchon() throws GameActionException {
-            if (nearestAllyArchon != null) {
-                return pathToLocation(nearestAllyArchon);
+            if (nearestArchon != null) {
+                return pathToLocation(nearestArchon);
             } else {
                 return moveToClosestAlly();
             }
@@ -223,7 +193,6 @@ public class RobotPlayer {
 
         public static boolean moveToClosestEnemyArchon() throws GameActionException {
             if (nearestEnemyArchon != null) {
-                rc.setIndicatorString(2, "Moving towards closest enemy archon: "+nearestEnemyArchon.toString());
                 return pathToLocation(nearestEnemyArchon);
             } else {
                 return randomMove();
@@ -356,11 +325,10 @@ public class RobotPlayer {
                         
                         // Nearest ally archon
                         case (MessageTags.NAAL) :
-                                nearestAllyArchon = loc;
+                                nearestArchon = loc;
                             break;
                         // Handle reporting of enemy archon locations
                         case MessageTags.EARL:
-//                            System.out.println("Enemy Archon location: "+message.getLocation().toString());
                             nearestEnemyArchon = message.getLocation();
                             break;
                             
@@ -461,26 +429,6 @@ public class RobotPlayer {
             attackableTraitors = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, enemyTeam);
             attackableZombies = rc.senseNearbyRobots(myRobotType.attackRadiusSquared, Team.ZOMBIE);
 //            attackableEnemies = Util.joinRobotInfo(attackableTraitors, attackableZombies);
-
-            if (nearestEnemyArchon != null) {
-                // rc.setIndicatorString(3, "Enemy Archon @
-                // "+nearestEnemyArchon.toString());
-                // System.out.println("Enemy archon @
-                // "+nearestEnemyArchon.toString());
-            } else {
-                // System.out.println("Unknown enemy archon location");
-                // Nearest Enemy Archons
-                nearestEnemyArchon = Util.closestMapLocation(myLocation, rc.getInitialArchonLocations(enemyTeam));
-                // System.out.println("Enemy archon @
-                // "+nearestEnemyArchon.toString());
-            }
-
-            // Nearest Ally Archons
-            if (nearestAllyArchon == null) {
-                nearestAllyArchon = Util.closestMapLocation(myLocation, rc.getInitialArchonLocations(myTeam));
-            }
-
-            boolean seesEnemyArchon = false;
             if (nearbyEnemies.length > 0) {
                 // Update nearest enemy location
                 int bestDist = myRobotType.sensorRadiusSquared + 1;
@@ -493,51 +441,20 @@ public class RobotPlayer {
                         bestDist = dist;
                         nearestEnemyLocation = robot.location;
                     }
-                    // Nearest Enemy Archon
-                    if (robot.type.equals(RobotType.ARCHON)) {
-                        seesEnemyArchon = true;
-                        if (dist < myLocation.distanceSquaredTo(nearestEnemyArchon)) {
-                            nearestEnemyArchon = robot.location;
-                        }
-                    }
                 }
             }
-            
-            // Check if Enemy Archon is gone!
-            if (nearestEnemyArchon != null && !seesEnemyArchon && rc.canSenseLocation(nearestEnemyArchon)) {
-                // Cannot see enemy archon however there should be one!
-                MapLocation[] enemyInitialArchonLocations = rc.getInitialArchonLocations(enemyTeam);
-                int idx = Util.indexOfMapLocation(enemyInitialArchonLocations, nearestEnemyArchon);
-                if (idx == -1) {
-                    // Not found
-                    // Start at beginning
-                    nearestEnemyArchon = enemyInitialArchonLocations[0];
-                } else {
-                    // Found, go to next
-                    idx++;
-                    if (idx < enemyInitialArchonLocations.length) {
-                        // Has next
-                        nearestEnemyArchon = enemyInitialArchonLocations[idx];
-                    } else {
-                        // At end
-                        nearestEnemyArchon = null;
-                    }
-                }
-            }
-            
-            // Nearest ally archon
+            // Nearest archon
             if (!myRobotType.equals(RobotType.ARCHON) && nearbyAllies.length > 0) {
-                // check for nearest ally archon
+                // check for nearest archon
                 int bestDist = myRobotType.sensorRadiusSquared + 1;
                 for (RobotInfo r : nearbyAllies) {
                     int dist = myLocation.distanceSquaredTo(r.location);
                     if (r.type.equals(RobotType.ARCHON) && dist < bestDist) {
                         bestDist = dist;
-                        nearestAllyArchon = r.location;
+                        nearestArchon = r.location;
                     }
                 }
             }
-            
         }
     }
 
@@ -601,30 +518,29 @@ public class RobotPlayer {
      * 
      */
     public static void loop() {
-        
         switch (myRobotType) {
-            case ARCHON:
-                ArchonPlayer.initialize();
-                break;
-            case TURRET:
-            case TTM:
-                TurretPlayer.initialize();
-                break;
-            case SOLDIER:
-                SoldierPlayer.initialize();
-                break;
-            case GUARD:
-                GuardPlayer.initialize();
-                break;
-            case VIPER:
-                ViperPlayer.initialize();
-                break;
-            case SCOUT:
-                ScoutPlayer.initialize();
-                break;
-            default:
-                System.out.println("Unknown Robot Type");
-                return;
+        case ARCHON:
+            ArchonPlayer.initialize();
+            break;
+        case TURRET:
+        case TTM:
+            TurretPlayer.initialize();
+            break;
+        case SOLDIER:
+            SoldierPlayer.initialize();
+            break;
+        case GUARD:
+            GuardPlayer.initialize();
+            break;
+        case VIPER:
+            ViperPlayer.initialize();
+            break;
+        case SCOUT:
+            ScoutPlayer.initialize();
+            break;
+        default:
+            System.out.println("Unknown Robot Type");
+            return;
         }
 
         while (true) {
@@ -635,8 +551,13 @@ public class RobotPlayer {
                 Sensing.updateNearbyEnemies();
                 
                 messagesSentThisRound = 0;
+                if (nearestEnemyArchon != null) {
+                    rc.setIndicatorString(3, "Enemy Archon @ "+nearestEnemyArchon.toString());
+//                    System.out.println("Enemy archon @ "+nearestEnemyArchon.toString());
+                } else {
+//                    System.out.println("Unknown enemy archon location");
+                }
                 
-
                 // Check if health has decreased
                 myHealth = rc.getHealth();
                 if (prevHealth != 0.0 && prevHealth < myHealth) {
@@ -694,8 +615,7 @@ public class RobotPlayer {
     }
     
     public static void updateDecays(){
-        ArrayList<DecayingMapLocation> temp = new ArrayList<DecayingMapLocation>(knownEnemyClusters);
-        for(DecayingMapLocation dloc : temp){
+        for(DecayingMapLocation dloc : knownEnemyClusters){
             if(dloc.ttl > 0){
                 dloc.ttl--;
             }else{
@@ -777,7 +697,7 @@ public class RobotPlayer {
                 totalRisk -= attackRisk(loc, r);
             }
             // Rubble protection
-            //totalRisk -= rubbleCover(loc) * 0.1;
+            totalRisk -= rubbleCover(loc) * 0.1;
 
             // rc.setIndicatorString(2, "Risk this turn is: " +
             // Double.toString(totalRisk));
@@ -814,10 +734,6 @@ public class RobotPlayer {
         }
         // Ignore TTM
         if (r.type.equals(RobotType.TTM)) {
-            return 0.0;
-        }
-        // Ignore zombie Den
-        if (r.type.equals(RobotType.ZOMBIEDEN)) {
             return 0.0;
         }
         MapLocation enemyLoc = r.location;
@@ -868,8 +784,7 @@ public class RobotPlayer {
                 RobotInfo robot = robots[i];
                 double rank = rankRobotAttackPriority(robot);
 //                int color = (int) Math.max(0, Math.min(255, rank));
-                rc.setIndicatorLine(myLocation, robot.location, (int) ((rank >= 0) ? Math.min(255, rank) : 0), (int) ((rank < 0) ? Math.min(255, -rank) : 0), 100);
-//                System.out.println("Rank: "+rank+" @ "+robot.toString());
+                rc.setIndicatorDot(robot.location, 0, 255, 255);
                 if (rank > bestRank) {
                     bestRobot = robot;
                     bestRank = rank;
@@ -892,11 +807,6 @@ public class RobotPlayer {
      * @return The total robot ranking
      */
     public static double rankRobotAttackPriority(RobotInfo robot) {
-        
-        // Subclasses
-        if(myRobotType.equals(RobotType.VIPER)) {
-            return ViperPlayer.rankRobotAttackPriority(robot);
-        }
         
         if (robot.type.equals(RobotType.ARCHON)) {
             // double archonCoef = 1000.0;

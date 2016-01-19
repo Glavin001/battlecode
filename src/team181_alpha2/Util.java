@@ -1,4 +1,4 @@
-package team181;
+package team181_alpha2;
 
 import battlecode.common.*;
 
@@ -72,20 +72,6 @@ public class Util {
             return closest;
         } else {
             return null;
-        }
-    }
-    
-    public static int indexOfMapLocation(MapLocation[] locations, MapLocation loc) {
-        if (locations.length > 0) {
-            int len = locations.length;
-            for (int i=0; i<len; i++) {
-                if (locations[i].equals(loc)) {
-                    return i;
-                }
-            }
-            return -1;
-        } else {
-            return -1;
         }
     }
 

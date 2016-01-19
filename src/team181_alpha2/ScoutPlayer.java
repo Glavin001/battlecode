@@ -1,4 +1,4 @@
-package team181;
+package team181_alpha2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +12,10 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
-import team181.CommUtil.MessageTags;
-import team181.RobotPlayer.Debug;
-import team181.RobotPlayer.Messaging;
-import team181.RobotPlayer.Sensing;
+import team181_alpha2.CommUtil.MessageTags;
+import team181_alpha2.RobotPlayer.Debug;
+import team181_alpha2.RobotPlayer.Messaging;
+import team181_alpha2.RobotPlayer.Sensing;
 
 /**
  * Scout player
@@ -89,7 +89,7 @@ public class ScoutPlayer extends RobotPlayer {
         }
 
         public static void broadcastMapBounds() throws GameActionException {
-            int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
+            int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
             rc.setIndicatorString(2, "I am broadcasting map coordinates now.");
             // Send north bound
             Message message = new Message(MessageTags.SMBN, new MapLocation(rc.getLocation().x, northBound));
@@ -106,33 +106,30 @@ public class ScoutPlayer extends RobotPlayer {
         }
 
         public static boolean tryExplore() throws GameActionException {
-            
-            if(currentBoundaryCooldown <= 0){
-                for(int i = 0; i < cardinals.length; i++){
-                    Direction dir = cardinals[i];
-                    //If we are close to the map boundary, move away from that direction
-                    if(checkCardinalOnMap(dir)){
-                        //Go in the next direction
-                        currentExploreDirection = currentExploreDirection.rotateRight();
-                        currentBoundaryCooldown += baseBoundaryCooldown;
-                        currentExploreCooldown = baseExploreCooldown;
-                        break;
+            // If we have not found every bound
+            if (numExploredDirections != 4 && allBoundsSet != true) {
+                // If we don't already have a bound for this direction
+                if (!haveOffsets[returnCardinalIndex(currentExploreDirection)]) {
+                    // If we go off the map in sight range for the given
+                    // direction,
+                    // we can get the offset
+                    if (!checkCardinalOnMap(currentExploreDirection)) {
+                        findExactOffset(currentExploreDirection);
+                        currentExploreDirection = cardinals[numExploredDirections % 4];
+                        // Otherwise go explore in that direction.
+                    } else {
+                        return explore(currentExploreDirection);
                     }
-                }                    
+                }
+            } else if (!haveBroadCastedMapBounds) {
+                broadcastMapBounds();
+                haveBroadCastedMapBounds = true;
+            } else {
+                return explore(Movement.randomDirection());
+                // explore(myLocation.directionTo(nearestArchon).opposite());
             }
-            
-            // If we run out of patience, try a new direction to explore.
-            if(currentExploreCooldown <= 0){
-                currentExploreDirection = directions[rand.nextInt(8)];
-                currentExploreCooldown += baseExploreCooldown;
-            }
-            rc.setIndicatorString(2, "Current explore cooldown is: " + Integer.toString(currentExploreCooldown));
-            rc.setIndicatorString(0, "Current explore direction is: " + currentExploreDirection.toString());
-            
-            return explore(currentExploreDirection);
-            
+            return false;
         }
-        
     }
 
     private static class ScoutMessaging {
@@ -217,7 +214,7 @@ public class ScoutPlayer extends RobotPlayer {
 
         // Broadcasts a report on all nearby interesting objects.
         public static void report() throws GameActionException {
-            int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
+            int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
 
             // Report Zombie dens and enemy Clusters
             int threatLevel = 0;
@@ -264,17 +261,11 @@ public class ScoutPlayer extends RobotPlayer {
     
     public static void tick() throws GameActionException {
         ScoutMessaging.handleMessageQueue();
-        if(currentExploreCooldown > 0){
-            currentExploreCooldown--;            
-        }
-        if(currentBoundaryCooldown > 0){
-            currentBoundaryCooldown--;
-        }
         if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {
                     broadCastCooldown += incurredCooldownPerBroadcast;
-                    int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
+                    int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
                     Message message = new Message(MessageTags.EARL, r.location, r.ID);
                     Messaging.sendMessage(message, distToNearestArchon);
                     rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: " + r.location.toString());

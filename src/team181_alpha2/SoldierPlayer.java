@@ -1,13 +1,13 @@
-package team181;
+package team181_alpha2;
 
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import team181.RobotPlayer.Debug;
-import team181.RobotPlayer.Messaging;
-import team181.RobotPlayer.Sensing;
+import team181_alpha2.RobotPlayer.Debug;
+import team181_alpha2.RobotPlayer.Messaging;
+import team181_alpha2.RobotPlayer.Sensing;
 
 /**
  * Soldier player
@@ -57,28 +57,28 @@ public class SoldierPlayer extends RobotPlayer {
                 if (dist > idealAllyDist) {
                     Movement.moveToClosestAlly();
                     rc.setIndicatorString(0, "Moving towards closest ally");
+                    return;
                 }
-            }
-            if (nearestEnemyArchon != null) {
+            } else if (nearestEnemyArchon != null) {
                 Movement.moveToClosestEnemyArchon();
                 rc.setIndicatorString(0, "Moving towards closest enemy archon");
-            } else {
-                Movement.randomMove();
-                rc.setIndicatorString(0, "Moving randomly");
+                return;
             }
+            Movement.randomMove();
+            rc.setIndicatorString(0, "Moving randomly");
         }
         
     }
     
     public static boolean retreatToArchon() throws GameActionException {
-        if (nearestAllyArchon != null && myLocation.distanceSquaredTo(nearestAllyArchon) <= RobotType.ARCHON.attackRadiusSquared) {
+        if (nearestArchon != null && myLocation.distanceSquaredTo(nearestArchon) <= RobotType.ARCHON.attackRadiusSquared) {
             // Enemies in sight, outside of attacking range
             rc.setIndicatorString(2, "Moving towards closest enemy");
             return Movement.moveToClosestEnemy();
         } else {
             // Not close to Archon yet
-            if (nearestAllyArchon != null) {
-                rc.setIndicatorString(2, "Retreating to archon @: " + nearestAllyArchon.toString());
+            if (nearestArchon != null) {
+                rc.setIndicatorString(2, "Retreating to archon @: " + nearestArchon.toString());
             }
             return Movement.retreatToArchon();
         }

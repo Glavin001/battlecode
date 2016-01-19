@@ -1,13 +1,13 @@
-package team181;
+package team181_alpha2;
 
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import team181.RobotPlayer.Messaging;
-import team181.RobotPlayer.Movement;
-import team181.RobotPlayer.Offensive;
+import team181_alpha2.RobotPlayer.Messaging;
+import team181_alpha2.RobotPlayer.Movement;
+import team181_alpha2.RobotPlayer.Offensive;
 
 /**
  * Viper player
@@ -18,7 +18,6 @@ public class ViperPlayer extends SoldierPlayer {
     public static boolean hasOffensiveAlliesNearby = false;
     public static final int minOffensiveAlliesCount = 1;
     public static double retreatHealthPercent = 0.3;
-    public static final int MIN_INFECTED_THRESHOLD = (int) RobotType.VIPER.attackDelay;
 
     public static void tick() throws GameActionException {
         Messaging.handleMessageQueue();
@@ -37,45 +36,36 @@ public class ViperPlayer extends SoldierPlayer {
 
         // Retreat if our health is less than retreatHealthPercent
         if (rc.getHealth() < (myRobotType.maxHealth * retreatHealthPercent)) {
-            retreatToArchon();
+            if (retreatToArchon()) {
+                return;
+            }
         }
 
         // Check for enemies
-        if (nearbyEnemies.length > 0) {
-            rc.setIndicatorString(0, "Sees nearby enemies");
+        if (rc.isWeaponReady() && nearbyEnemies.length > 0) {
             // Enemies are within sight
             if (attackableEnemies.length > 0) {
-                rc.setIndicatorString(0, "Can attack nearby enemies");
                 // Enemies within attack range
                 RobotInfo enemy = bestRobotToAttack(attackableEnemies);
-                // Attack this dude!
-                if (rc.isWeaponReady() && rc.canAttackLocation(enemy.location)) {
-                    rc.setIndicatorString(0, "Attacked enemy: "+enemy.toString());
-                    rc.attackLocation(enemy.location);
-                }
                 // Check if this robot is already infected
-                if (enemy.viperInfectedTurns != 0 && rc.isCoreReady()) {
-                    // Enemy not infected
+                if (enemy.viperInfectedTurns == 0 && rc.isCoreReady()) {
                     // Check if moving would help attack an not infected enemy
                     RobotInfo infectedRobot = findFirstNotInfectedRobot(nearbyEnemies);
-                    if (infectedRobot != null) {
-                        // Found non-infected robot!
-                        Movement.pathToLocation(infectedRobot.location);
-                    } else {
-                        // No non-infected robots found!
-                        Movement.moveAroundLocation(enemy.location, enemy.type.attackRadiusSquared, myRobotType.attackRadiusSquared);
+                    if (infectedRobot != null && Movement.pathToLocation(infectedRobot.location)) {
+                        return;
                     }
-                } else {
-                    // Enemy was already infected
-                    Movement.moveAroundLocation(enemy.location, enemy.type.attackRadiusSquared, myRobotType.attackRadiusSquared);
                 }
+                // Attack this dude!
+                rc.attackLocation(enemy.location);
+                return;
             } else {
                 if (rc.isCoreReady()) {
                     // Enemies are visible but out of attack range
                     // Move closer
                      RobotInfo enemy = bestRobotToAttack(nearbyEnemies);
-                     Movement.moveAroundLocation(enemy.location, enemy.type.attackRadiusSquared, myRobotType.attackRadiusSquared);
-//                     Movement.pathToLocation(enemy.location);
+                     if (Movement.pathToLocation(enemy.location)) {
+                         return;
+                     }
 //                     rc.move(myLocation.directionTo(enemy.location));
 //                    if (Movement.moveToClosestEnemy()) {
 //                        return;
@@ -83,14 +73,15 @@ public class ViperPlayer extends SoldierPlayer {
                 }
             }
         } else {
-            rc.setIndicatorString(0, "No enemies in sight");
             if (rc.isCoreReady()) {
                 // No visible enemies
                 // Move towards where enemies might be
-                Movement.moveToClosestEnemyArchon();
+                if (Movement.moveToClosestEnemyArchon()) {
+                    return;
+                }
             }
         }
-        
+
     }
 
     /**
@@ -125,18 +116,12 @@ public class ViperPlayer extends SoldierPlayer {
 
         // Prioritize Archons
         int infectedTurns = robot.viperInfectedTurns;
-        if (robot.type.equals(RobotType.ARCHON) && infectedTurns <= MIN_INFECTED_THRESHOLD) {
+        if (robot.type.equals(RobotType.ARCHON) && infectedTurns == 0) {
             // Archon that is not infected
             rank *= 10.0;
         } else if (robot.team.equals(Team.ZOMBIE)) {
             // Decrease Zombie priority
             rank *= 0.1;
-        }
-        
-        if (infectedTurns >= MIN_INFECTED_THRESHOLD) {
-            // Is infected
-            // Lower priority
-            rank *= -infectedTurns;
         }
 
         int dist = myLocation.distanceSquaredTo(robot.location);
@@ -161,6 +146,12 @@ public class ViperPlayer extends SoldierPlayer {
 
         // Closest
         rank /= dist;
+
+        if (infectedTurns > 0) {
+            // Is infected
+            // Lower priority
+            rank *= -infectedTurns;
+        }
 
         return rank;
 
