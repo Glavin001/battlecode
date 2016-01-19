@@ -99,6 +99,7 @@ public class RobotPlayer {
     static int baseExploreCooldown = 40; // Explore for 40 rounds
     static int currentBoundaryCooldown = 0; 
     static int baseBoundaryCooldown = 10; // Allow scouts 10 turns to get away from the wall
+    static MapLocation myPreviousLocation = new MapLocation(0,0);
 
     /**
      * Movement
@@ -704,6 +705,25 @@ public class RobotPlayer {
             }
         }
     }
+    
+    public static boolean safeToBroadcast(){
+        for(int i = 0; i < nearbyEnemies.length; i++){
+            RobotInfo robot = nearbyEnemies[i];
+            switch(robot.type){
+                case ZOMBIEDEN:
+                case SCOUT:
+                case ARCHON:
+                    break;
+                default:
+                    // If the distance between them is less than the other robot's attack radius, don't broadcast!
+                    if(robot.location.distanceSquaredTo(rc.getLocation()) <= robot.type.attackRadiusSquared){
+                        return false;
+                    }
+                    break;            
+            }  
+        }
+        return true;
+    }
 
     /**
      * Determine if robot should flee (fight or flight)
@@ -996,7 +1016,7 @@ public class RobotPlayer {
      */
      public static boolean explore(Direction dirToMove) throws GameActionException {
         if (rc.isCoreReady()) {
-            if (true/*nearbyEnemies.length == 0*/) {
+            if (nearbyEnemies.length == 0) {
                 // There are no known enemy threats
                 if (rc.canMove(dirToMove)) {
                     rc.move(dirToMove);
@@ -1009,12 +1029,12 @@ public class RobotPlayer {
                     return true;
                 }
             } 
-//            else {
-//                Direction bestDir = leastRiskyDirection(dirToMove);
-//                if (!bestDir.equals(Direction.NONE)) {
-//                    return Movement.moveOrClear(bestDir);
-//                }
-//            }
+            else {
+                Direction bestDir = leastRiskyDirection(dirToMove);
+                if (!bestDir.equals(Direction.NONE)) {
+                    return Movement.moveOrClear(bestDir);
+                }
+            }
         }
         return false;
     }

@@ -62,9 +62,9 @@ public class ScoutPlayer extends RobotPlayer {
         // This should only take in north,south,east,west
         public static boolean checkCardinalOnMap(Direction dir) throws GameActionException {
             MapLocation offsetLocation = rc.getLocation().add(dir, myDv);
-            rc.setIndicatorDot(offsetLocation, 255, 80, 80);
+            //rc.setIndicatorDot(offsetLocation, 255, 80, 80);
             boolean onMap = rc.onTheMap(offsetLocation);
-            rc.setIndicatorString(0, dir.toString() + " point on map?: " + Boolean.toString(onMap));
+            //rc.setIndicatorString(0, dir.toString() + " point on map?: " + Boolean.toString(onMap));
             return onMap;
         }
 
@@ -111,7 +111,7 @@ public class ScoutPlayer extends RobotPlayer {
                 for(int i = 0; i < cardinals.length; i++){
                     Direction dir = cardinals[i];
                     //If we are close to the map boundary, move away from that direction
-                    if(checkCardinalOnMap(dir)){
+                    if(!checkCardinalOnMap(dir)){
                         //Go in the next direction
                         currentExploreDirection = currentExploreDirection.rotateRight();
                         currentBoundaryCooldown += baseBoundaryCooldown;
@@ -277,7 +277,7 @@ public class ScoutPlayer extends RobotPlayer {
             currentBoundaryCooldown--;
         }
         
-        //Broadcasat enemy archon
+        //Broadcast enemy archon
         if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {
@@ -295,10 +295,10 @@ public class ScoutPlayer extends RobotPlayer {
 
         Exploration.tryExplore();
 
-        // If we have found every bound
-        //if (numExploredDirections == 4 || allBoundsSet == true) {
+
+        if(safeToBroadcast()){
             ScoutReporting.report();
-        //}
+        }
 
     }
 }
