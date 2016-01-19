@@ -74,6 +74,20 @@ public class Util {
             return null;
         }
     }
+    
+    public static int indexOfMapLocation(MapLocation[] locations, MapLocation loc) {
+        if (locations.length > 0) {
+            int len = locations.length;
+            for (int i=0; i<len; i++) {
+                if (locations[i].equals(loc)) {
+                    return i;
+                }
+            }
+            return -1;
+        } else {
+            return -1;
+        }
+    }
 
     /**
      * Determine the closest Robot to a center location

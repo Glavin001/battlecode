@@ -57,28 +57,28 @@ public class SoldierPlayer extends RobotPlayer {
                 if (dist > idealAllyDist) {
                     Movement.moveToClosestAlly();
                     rc.setIndicatorString(0, "Moving towards closest ally");
-                    return;
                 }
-            } else if (nearestEnemyArchon != null) {
+            }
+            if (nearestEnemyArchon != null) {
                 Movement.moveToClosestEnemyArchon();
                 rc.setIndicatorString(0, "Moving towards closest enemy archon");
-                return;
+            } else {
+                Movement.randomMove();
+                rc.setIndicatorString(0, "Moving randomly");
             }
-            Movement.randomMove();
-            rc.setIndicatorString(0, "Moving randomly");
         }
         
     }
     
     public static boolean retreatToArchon() throws GameActionException {
-        if (nearestArchon != null && myLocation.distanceSquaredTo(nearestArchon) <= RobotType.ARCHON.attackRadiusSquared) {
+        if (nearestAllyArchon != null && myLocation.distanceSquaredTo(nearestAllyArchon) <= RobotType.ARCHON.attackRadiusSquared) {
             // Enemies in sight, outside of attacking range
             rc.setIndicatorString(2, "Moving towards closest enemy");
             return Movement.moveToClosestEnemy();
         } else {
             // Not close to Archon yet
-            if (nearestArchon != null) {
-                rc.setIndicatorString(2, "Retreating to archon @: " + nearestArchon.toString());
+            if (nearestAllyArchon != null) {
+                rc.setIndicatorString(2, "Retreating to archon @: " + nearestAllyArchon.toString());
             }
             return Movement.retreatToArchon();
         }

@@ -127,7 +127,7 @@ public class ArchonPlayer extends RobotPlayer {
                             Messaging.sendMessage(message, broadcastDistance);
                             if (nearestEnemyArchon != null) {
                                 // Broadcast where enemy archon is
-                                message = new Message(MessageTags.EARL, nearestArchon);
+                                message = new Message(MessageTags.EARL, nearestEnemyArchon);
                                 Messaging.sendMessage(message, broadcastDistance);
                                 // System.out.println("Broadcasting enemy
                                 // archon: "+nearestEnemyArchon.toString());
@@ -183,12 +183,9 @@ public class ArchonPlayer extends RobotPlayer {
         // Activating Neutrals
         RobotInfo[] neutralRobots = rc.senseNearbyRobots(-1, Team.NEUTRAL);
         if (neutralRobots.length > 0) {
-            if (activateNeutrals(neutralRobots)) {
-                return;
-            }
+            activateNeutrals(neutralRobots);
         }
         
-
         // Move to closest neutrals
         if (neutralRobots.length > 0 && rc.isCoreReady()) {
             RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
@@ -208,9 +205,7 @@ public class ArchonPlayer extends RobotPlayer {
         }
 
         // Building
-        if (Building.tryBuildUnit(nextRobotTypeToBuild())) {
-            return;
-        }
+        Building.tryBuildUnit(nextRobotTypeToBuild());
 
         // Survival
         if (shouldFlee()) {
@@ -225,19 +220,14 @@ public class ArchonPlayer extends RobotPlayer {
                 Direction bestDir = leastRiskyDirection(dirToMove);
                 if (!bestDir.equals(Direction.NONE)) {
                     rc.move(bestDir);
-                    return;
                 }
             }
         }
 
         // Repairing
-        if (repairAllies(nearbyAllies)) {
-            return;
-        }
+        repairAllies(nearbyAllies);
         // Pick up Parts
-        if (retrieveParts()) {
-            return;
-        }
+        retrieveParts();
 
         // Move randomly!
         // Movement.randomMove();

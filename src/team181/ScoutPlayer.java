@@ -89,7 +89,7 @@ public class ScoutPlayer extends RobotPlayer {
         }
 
         public static void broadcastMapBounds() throws GameActionException {
-            int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
+            int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
             rc.setIndicatorString(2, "I am broadcasting map coordinates now.");
             // Send north bound
             Message message = new Message(MessageTags.SMBN, new MapLocation(rc.getLocation().x, northBound));
@@ -214,7 +214,7 @@ public class ScoutPlayer extends RobotPlayer {
 
         // Broadcasts a report on all nearby interesting objects.
         public static void report() throws GameActionException {
-            int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
+            int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
 
             // Report Zombie dens and enemy Clusters
             int threatLevel = 0;
@@ -265,7 +265,7 @@ public class ScoutPlayer extends RobotPlayer {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {
                     broadCastCooldown += incurredCooldownPerBroadcast;
-                    int distToNearestArchon = nearestArchon.distanceSquaredTo(rc.getLocation());
+                    int distToNearestArchon = nearestAllyArchon.distanceSquaredTo(rc.getLocation());
                     Message message = new Message(MessageTags.EARL, r.location, r.ID);
                     Messaging.sendMessage(message, distToNearestArchon);
                     rc.setIndicatorString(2, "I transmitted Enemy Archon Location this turn: " + r.location.toString());
