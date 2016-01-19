@@ -261,7 +261,9 @@ public class RobotPlayer {
             if (rc.isCoreReady()) {
                 Direction dirToMove = myLocation.directionTo(loc);
                 rc.setIndicatorString(0, "Direction to path is: " + dirToMove.toString());
-                if (rc.senseRubble(myLocation.add(dirToMove)) >= GameConstants.RUBBLE_SLOW_THRESH) {
+                double rubbleAmount = rc.senseRubble(myLocation.add(dirToMove));
+                double turnsToClearToMove = Util.turnsToClearRubbleToMove(rubbleAmount);
+                if (!myRobotType.equals(RobotType.SCOUT) && turnsToClearToMove >= 1.0 && turnsToClearToMove <= 5.0) {
                     // Too much rubble, so I should clear it
                     rc.clearRubble(dirToMove);
                     return true;
@@ -357,12 +359,16 @@ public class RobotPlayer {
                         
                         // Nearest ally archon
                         case (MessageTags.NAAL) :
+                            if (nearestAllyArchon == null || (myLocation.distanceSquaredTo(loc) < myLocation.distanceSquaredTo(nearestAllyArchon))) {
                                 nearestAllyArchon = loc;
+                            }
                             break;
                         // Handle reporting of enemy archon locations
                         case MessageTags.EARL:
 //                            System.out.println("Enemy Archon location: "+message.getLocation().toString());
-                            nearestEnemyArchon = message.getLocation();
+                            if (nearestEnemyArchon == null || (myLocation.distanceSquaredTo(message.getLocation()) < myLocation.distanceSquaredTo(nearestEnemyArchon))) {
+                                nearestEnemyArchon = message.getLocation();
+                            }
                             break;
                             
                         // Store enemy clusters
@@ -667,9 +673,11 @@ public class RobotPlayer {
 
                 // Check if health has decreased
                 myHealth = rc.getHealth();
-                if (prevHealth != 0.0 && prevHealth < myHealth) {
+                if (prevHealth != 0.0 && prevHealth > myHealth) {
+                    // Health has decreased
                     wasAttacked = true;
                 } else {
+                    // Health has not decreased
                     wasAttacked = false;
                 }
                 prevHealth = myHealth;
@@ -823,8 +831,18 @@ public class RobotPlayer {
                 RobotInfo r = nearbyAllies[i];
                 totalRisk -= attackRisk(loc, r);
             }
-            // Rubble protection
-            //totalRisk -= rubbleCover(loc) * 0.1;
+            // Neutral assistance
+            if (myRobotType.equals(RobotType.ARCHON)) {
+                int nlen = nearbyNeutrals.length;
+                for (int i=0; i<nlen; i++) {
+                    RobotInfo r = nearbyNeutrals[i];
+                    totalRisk -= attackRisk(loc, r);
+                }
+            }
+            // Consider Rubble protection
+            else if (myRobotType.equals(RobotType.SCOUT)) {
+                totalRisk -= rubbleCover(loc) * 0.1;
+            }
 
             // rc.setIndicatorString(2, "Risk this turn is: " +
             // Double.toString(totalRisk));
@@ -885,6 +903,7 @@ public class RobotPlayer {
     
     public static double rubbleCover(MapLocation loc) {
         double totalRubble = 0;
+        double maxTurnsToMove = 3.0;
         for (Direction dir : directions) {
             double rubble = rc.senseRubble(loc.add(dir));
             double bonus = 1.0;
@@ -893,6 +912,8 @@ public class RobotPlayer {
                 // Count turns to clear
                 // How long until they could move?
                 double turnsToMove = Util.turnsToClearRubbleToMove(rubble);
+                // Maximum number of turns
+                turnsToMove = turnsToMove > maxTurnsToMove ? maxTurnsToMove : turnsToMove;
                 rubble *= turnsToMove;
             }
             totalRubble += rubble * bonus * GameConstants.RUBBLE_SLOW_THRESH;
@@ -1025,7 +1046,8 @@ public class RobotPlayer {
                 }
             }
         }
-        rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
+        rc.setIndicatorString(2, "Ideal dir: "+idealDir.toString()+", Leasty Risky Dir: "+leastRiskyDirection.toString());
+//        rc.setIndicatorString(2, "Risk this turn is: " + Arrays.toString(risks));
         return leastRiskyDirection;
     }
     

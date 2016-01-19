@@ -198,29 +198,11 @@ public class ArchonPlayer extends RobotPlayer {
             activateNeutrals(neutralRobots);
         }
         
-        // Move to closest neutrals
-        if (neutralRobots.length > 0 && rc.isCoreReady()) {
-            RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
-            MapLocation loc = neutralRobot.location;
-            Direction dirToMove = myLocation.directionTo(loc);
-            rc.setIndicatorLine(myLocation, loc, 0, 100, 100);
-            Movement.moveOrClear(dirToMove);
-            Direction bestDir = leastRiskyDirection(dirToMove);
-//            if (!bestDir.equals(Direction.NONE)) {
-//                rc.move(bestDir);
-                rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
-                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
-//                return;
-//            } else {
-//                rc.setIndicatorString(1, "Not moving towards neutral: " + Integer.toString(neutralRobot.ID));
-//            }
-        }
-
         // Building
         Building.tryBuildUnit(nextRobotTypeToBuild());
 
         // Survival
-        if (shouldFlee()) {
+        if (wasAttacked || shouldFlee()) {
             if (rc.isCoreReady()) {
                 Direction dirToMove = Direction.NONE;
                 if (nearbyAllies.length > 0) {
@@ -236,9 +218,29 @@ public class ArchonPlayer extends RobotPlayer {
             }
         }
 
+        // Move to closest neutrals
+        if (neutralRobots.length > 0 && rc.isCoreReady()) {
+            RobotInfo neutralRobot = Util.closestRobot(myLocation, neutralRobots);
+            MapLocation loc = neutralRobot.location;
+            Direction dirToMove = myLocation.directionTo(loc);
+            rc.setIndicatorLine(myLocation, loc, 0, 100, 100);
+//            Movement.moveOrClear(dirToMove);
+            Direction bestDir = leastRiskyDirection(dirToMove, true);
+            if (!bestDir.equals(Direction.NONE)) {
+                Movement.moveOrClear(bestDir);
+                rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
+                rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
+                return;
+            } else {
+                rc.setIndicatorString(1, "Not moving towards neutral: " + Integer.toString(neutralRobot.ID));
+            }
+        } else {
+            rc.setIndicatorString(2, "Are not moving towards neutrals: "+neutralRobots.length);
+        }
+
         // Repairing
         repairAllies(nearbyAllies);
-        // Pick up Parts
+        // Move to Pick up Parts
         retrieveParts();
 
         // Move randomly!

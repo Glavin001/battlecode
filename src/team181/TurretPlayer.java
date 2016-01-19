@@ -33,20 +33,20 @@ public class TurretPlayer extends RobotPlayer {
                 if (rc.canAttackLocation(enemy.location)) {
                     rc.attackLocation(enemy.location);
                     rc.setIndicatorDot(enemy.location, 255, 10, 10);
-                    rc.setIndicatorString(2, "Attacking Enemy at " + enemy.location.toString());
+                    rc.setIndicatorString(1, "Attacking Enemy at " + enemy.location.toString());
                 }
             } else if (attackableZombies.length > 0) {
                 RobotInfo zombie = bestRobotToAttack(attackableZombies);
                 if (rc.canAttackLocation(zombie.location)) {
                     rc.attackLocation(zombie.location);
                     rc.setIndicatorDot(zombie.location, 255, 10, 10);
-                    rc.setIndicatorString(2, "Attacking Zombie at " + zombie.location.toString());
+                    rc.setIndicatorString(1, "Attacking Zombie at " + zombie.location.toString());
                 }
             } else {
-                rc.setIndicatorString(2, "Nothing to attack");
+                rc.setIndicatorString(1, "Nothing to attack");
             }
         } else {
-            rc.setIndicatorString(2, "Weapon not ready");
+            rc.setIndicatorString(1, "Weapon not ready");
         }
 
         // Not currently attacking
@@ -60,7 +60,7 @@ public class TurretPlayer extends RobotPlayer {
                 int dist = myLocation.distanceSquaredTo(nearestAllyArchon);
                 if (dist > maxArchonDistSquared) {
                     // Too far! Let's move closer
-                    rc.setIndicatorString(2, "Too far from Ally Archon");
+                    rc.setIndicatorString(1, "Too far from Ally Archon");
                     // Can we move?
                     if (myRobotType.equals(RobotType.TURRET)) {
                         // Nope, can't move
@@ -72,7 +72,7 @@ public class TurretPlayer extends RobotPlayer {
                     }
                 } else if (dist < minArchonDistSquared) {
                     // too close! Give the archon some space!
-                    rc.setIndicatorString(2, "Too close to Ally Archon");
+                    rc.setIndicatorString(1, "Too close to Ally Archon");
                     // Can we move?
                     if (myRobotType.equals(RobotType.TURRET)) {
                         // Nope, can't move
@@ -84,6 +84,7 @@ public class TurretPlayer extends RobotPlayer {
                     }
                 } else {
                     // All good
+                    rc.setIndicatorString(1, "Good distance away from Ally Archon");
                     // Are we ready to attack?
                     if (myRobotType.equals(RobotType.TTM)) {
                         // Nope, need to unpack
@@ -96,6 +97,7 @@ public class TurretPlayer extends RobotPlayer {
             }
         } else {
             // Enemies!
+            rc.setIndicatorString(1, "Enemies! Prepare to attack!");
             // Are we ready to attack?
             if (myRobotType.equals(RobotType.TTM)) {
                 // Nope, we need to unpack
@@ -109,6 +111,7 @@ public class TurretPlayer extends RobotPlayer {
         if (rc.isCoreReady()) {
             Direction bestDir = leastRiskyDirection(dirToMove);
             if (!bestDir.equals(Direction.NONE)) {
+                rc.setIndicatorString(2, "Moving in direction: "+bestDir.toString());
                 rc.move(bestDir);
                 return true;
             }

@@ -118,7 +118,7 @@ public class ScoutPlayer extends RobotPlayer {
                         currentExploreCooldown = baseExploreCooldown;
                         break;
                     }
-                }                    
+                }
             }
             
             // If we run out of patience, try a new direction to explore.
