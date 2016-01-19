@@ -38,7 +38,7 @@ public class Message {
      */
     public Message(int tag, MapLocation loc, int id){
         setTag(tag);
-        setLocation(loc);
+        setLocation(new MapLocation(loc.x, loc.y));
         setID(id);
     }
     
@@ -64,8 +64,8 @@ public class Message {
     }
     
     public Message(int tag, DecayingMapLocation dloc){
-        setTag(tag);
         setLocation(dloc.location);
+        setTag(tag);
         setTTL(dloc.ttl);
         setThreat(dloc.threatLevel);
     }
@@ -100,7 +100,8 @@ public class Message {
     }
     
     public int getTTL(){
-        return (int)Math.floor(part2 / ttlOffset);
+        // Get rid of higher bits first, then lower bits
+        return (int)Math.floor((part2 % threatOffset) / ttlOffset);
     }
     
     public int getThreat(){

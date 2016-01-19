@@ -13,9 +13,9 @@ public class DecayingMapLocation {
     public static final int maxThreat = 127;
     
     public DecayingMapLocation(MapLocation loc, int threatLevel, int ttl) {
-        this.location = loc;
+        this.location = new MapLocation(loc.x, loc.y);
         this.ttl = Math.min(ttl, maxTTL);
-        this.threatLevel = Math.min(ttl, maxTTL);
+        this.threatLevel = Math.min(threatLevel, maxThreat);
     }
     
     public DecayingMapLocation(MapLocation loc, int threatLevel) {

@@ -126,7 +126,7 @@ public class ScoutPlayer extends RobotPlayer {
                 currentExploreDirection = directions[rand.nextInt(8)];
                 currentExploreCooldown += baseExploreCooldown;
             }
-            rc.setIndicatorString(2, "Current explore cooldown is: " + Integer.toString(currentExploreCooldown));
+            //rc.setIndicatorString(2, "Current explore cooldown is: " + Integer.toString(currentExploreCooldown));
             rc.setIndicatorString(0, "Current explore direction is: " + currentExploreDirection.toString());
             
             return explore(currentExploreDirection);
@@ -205,6 +205,7 @@ public class ScoutPlayer extends RobotPlayer {
         public static void reportEnemyCluster(MapLocation loc, int threatLevel, int squaredRadius) throws GameActionException{
             // Add the new cluster if needed.
             DecayingMapLocation cluster = new DecayingMapLocation(loc, threatLevel);
+//            System.out.println("The threatlevel after constructor was: " + Integer.toString(cluster.threatLevel));
             boolean wasUpdated = Messaging.storeCluster(cluster);
             if(wasUpdated){
                 // Alert other units of its presence.
@@ -223,6 +224,7 @@ public class ScoutPlayer extends RobotPlayer {
             int threatLevel = 0;
             int averageEnemyX = 0;
             int averageEnemyY = 0;
+            int enemyCount = 0;
             for (RobotInfo robot : nearbyEnemies) {
                 switch(robot.type){
                     case ZOMBIEDEN:
@@ -238,17 +240,21 @@ public class ScoutPlayer extends RobotPlayer {
                         threatLevel += 1;
                         averageEnemyX += robot.location.x;
                         averageEnemyY += robot.location.y;
+                        enemyCount += 1;
                         break;
                     default:
                         break;
                 }
             }
             // If we detected any enemies, then report their cluster location
-            if(nearbyEnemies.length != 0){
-                averageEnemyX = averageEnemyX / nearbyEnemies.length;
-                averageEnemyY = averageEnemyY / nearbyEnemies.length;
+            if(enemyCount != 0){
+                averageEnemyX = averageEnemyX / enemyCount;
+                averageEnemyY = averageEnemyY / enemyCount;
                 MapLocation loc = new MapLocation(averageEnemyX, averageEnemyY);
+//                System.out.println("The reported threat level was: " + Integer.toString(threatLevel));
+//                System.out.println("The given location was: " + loc.toString());
                 reportEnemyCluster(loc, threatLevel, distToNearestArchon);
+                rc.setIndicatorString(0, "I reported a new cluster this round!");
             }
             
             for (RobotInfo robot : nearbyNeutrals) {
@@ -270,6 +276,8 @@ public class ScoutPlayer extends RobotPlayer {
         if(currentBoundaryCooldown > 0){
             currentBoundaryCooldown--;
         }
+        
+        //Broadcasat enemy archon
         if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {
@@ -288,9 +296,9 @@ public class ScoutPlayer extends RobotPlayer {
         Exploration.tryExplore();
 
         // If we have found every bound
-        if (numExploredDirections == 4 || allBoundsSet == true) {
+        //if (numExploredDirections == 4 || allBoundsSet == true) {
             ScoutReporting.report();
-        }
+        //}
 
     }
 }

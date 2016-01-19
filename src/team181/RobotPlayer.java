@@ -112,7 +112,7 @@ public class RobotPlayer {
         }
 
         public static boolean randomMove() throws GameActionException {
-            System.out.println("DEPRECATED: randomMove is deprecated. Please use something else, such as moveToClosestEnemyArchon, etc.");
+            //System.out.println("DEPRECATED: randomMove is deprecated. Please use something else, such as moveToClosestEnemyArchon, etc.");
             int fate = rand.nextInt(8);
             if (rc.isCoreReady()) {
                 Direction dirToMove;
@@ -366,6 +366,7 @@ public class RobotPlayer {
                             
                         // Store enemy clusters
                         case MessageTags.CLUS:
+//                            System.out.println("The threat was: " + message.getThreat() + " ttl: " + message.getTTL());
                             storeCluster(new DecayingMapLocation(message.getLocation(), message.getThreat(), message.getTTL()));
                             break;
                     }
@@ -428,10 +429,10 @@ public class RobotPlayer {
                     // If we have a larger threat, replace old cluster with new one
                     // Also replace if the old threat has expired
                     if(knownCluster.threatLevel < dloc.threatLevel || knownCluster.ttl <= clusterExpiry){
-                        //System.out.println("I replaced a cluster with at " + knownCluster.location.toString()
-                        //+ " threat: " + knownCluster.threatLevel + " ttl: " + knownCluster.ttl);
-                        //System.out.println(" with the cluster " + dloc.location.toString()
-                        //+ " threat: " + dloc.threatLevel + " ttl: " + dloc.ttl);
+//                        System.out.println("I replaced a cluster with at " + knownCluster.location.toString()
+//                        + " threat: " + knownCluster.threatLevel + " ttl: " + knownCluster.ttl);
+//                        System.out.println(" with the cluster " + dloc.location.toString()
+//                        + " threat: " + dloc.threatLevel + " ttl: " + dloc.ttl);
                         knownEnemyClusters.remove(knownCluster);
                         knownEnemyClusters.add(dloc);
                         return true;
@@ -441,8 +442,8 @@ public class RobotPlayer {
                 }
             }    
             //If we get here, we are close to none of the existing clusters, so add it.
-            //System.out.println("I added a  new cluster at " + dloc.location.toString()
-            //+ " threat: " + dloc.threatLevel + " ttl: " + dloc.ttl);
+//            System.out.println("I added a  new cluster at " + dloc.location.toString()
+//            + " threat: " + dloc.threatLevel + " ttl: " + dloc.ttl);
             knownEnemyClusters.add(dloc);
             return true;
         }
@@ -995,7 +996,7 @@ public class RobotPlayer {
      */
      public static boolean explore(Direction dirToMove) throws GameActionException {
         if (rc.isCoreReady()) {
-            if (nearbyEnemies.length == 0) {
+            if (true/*nearbyEnemies.length == 0*/) {
                 // There are no known enemy threats
                 if (rc.canMove(dirToMove)) {
                     rc.move(dirToMove);
@@ -1007,12 +1008,13 @@ public class RobotPlayer {
                     rc.move(dirToMove.rotateRight());
                     return true;
                 }
-            } else {
-                Direction bestDir = leastRiskyDirection(dirToMove);
-                if (!bestDir.equals(Direction.NONE)) {
-                    return Movement.moveOrClear(bestDir);
-                }
-            }
+            } 
+//            else {
+//                Direction bestDir = leastRiskyDirection(dirToMove);
+//                if (!bestDir.equals(Direction.NONE)) {
+//                    return Movement.moveOrClear(bestDir);
+//                }
+//            }
         }
         return false;
     }
