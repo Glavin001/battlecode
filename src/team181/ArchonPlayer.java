@@ -69,6 +69,12 @@ public class ArchonPlayer extends RobotPlayer {
                                 Messaging.sendMessage(relayMessage, defaultBroadcastRange);                                
                             }
                             break;
+                        case MessageTags.PART:
+                            Messaging.storeParts(message.getLocation());
+                            break;
+                        case MessageTags.NEUT:
+                            System.out.println("I received a message about neutrals!");
+                            Messaging.storeNeutral(message.getLocation());
                     }
 
                 }
@@ -92,9 +98,6 @@ public class ArchonPlayer extends RobotPlayer {
             Messaging.sendMessage(message, defaultBroadcastRange);
         }
         
-        public static void addClusters(DecayingMapLocation dloc){
-            
-        }
     }
 
     static class Building {
@@ -177,6 +180,15 @@ public class ArchonPlayer extends RobotPlayer {
         
         for (MapLocation loc : knownDens) {
             rc.setIndicatorDot(loc, 180, 80, 180);
+        }
+        
+        System.out.println("Number of known neutrals: " + Integer.toString(knownNeutrals.size()));
+        for(MapLocation loc : knownParts){
+            rc.setIndicatorDot(loc, 80, 180, 80);
+        }
+        
+        for(MapLocation loc : knownNeutrals){
+            rc.setIndicatorDot(loc, 80, 180, 80);
         }
 
         // Priorities

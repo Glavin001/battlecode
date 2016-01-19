@@ -185,6 +185,7 @@ public class ScoutPlayer extends RobotPlayer {
             }
             // Otherwise we are dealing with a new object.
             rc.setIndicatorDot(loc, 255, 100, 255);
+            System.out.println("I reported a neutral or part @: " + message.getLocation().toString());
             knowns.add(loc);
             Messaging.sendMessage(message, squaredRadius);;
         }

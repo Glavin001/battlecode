@@ -448,6 +448,32 @@ public class RobotPlayer {
             knownEnemyClusters.add(dloc);
             return true;
         }
+        
+        public static boolean storeParts(MapLocation loc){
+            int size = knownParts.size();
+            for(int i = 0; i < size; i++){
+                MapLocation otherLoc = knownParts.get(i);
+                if(otherLoc.equals(loc)){
+                    return false;
+                }
+            }
+            System.out.println("I added a new part!");
+            knownParts.add(loc);
+            return true;
+        }
+        
+        public static boolean storeNeutral(MapLocation loc){
+            int size = knownNeutrals.size();
+            for(int i = 0; i < size; i++){
+                MapLocation otherLoc = knownNeutrals.get(i);
+                if(otherLoc.equals(loc)){
+                    return false;
+                }
+            }
+            System.out.println("I added a new neutral!");
+            knownNeutrals.add(loc);
+            return true;            
+        }
 
     }
 
@@ -716,7 +742,7 @@ public class RobotPlayer {
                     break;
                 default:
                     // If the distance between them is less than the other robot's attack radius, don't broadcast!
-                    if(robot.location.distanceSquaredTo(rc.getLocation()) <= robot.type.attackRadiusSquared){
+                    if(robot.location.distanceSquaredTo(rc.getLocation()) <= robot.type.attackRadiusSquared + 1){
                         return false;
                     }
                     break;            
