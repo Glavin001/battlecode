@@ -106,30 +106,33 @@ public class ScoutPlayer extends RobotPlayer {
         }
 
         public static boolean tryExplore() throws GameActionException {
-            // If we have not found every bound
-            if (numExploredDirections != 4 && allBoundsSet != true) {
-                // If we don't already have a bound for this direction
-                if (!haveOffsets[returnCardinalIndex(currentExploreDirection)]) {
-                    // If we go off the map in sight range for the given
-                    // direction,
-                    // we can get the offset
-                    if (!checkCardinalOnMap(currentExploreDirection)) {
-                        findExactOffset(currentExploreDirection);
-                        currentExploreDirection = cardinals[numExploredDirections % 4];
-                        // Otherwise go explore in that direction.
-                    } else {
-                        return explore(currentExploreDirection);
+            
+            if(currentBoundaryCooldown <= 0){
+                for(int i = 0; i < cardinals.length; i++){
+                    Direction dir = cardinals[i];
+                    //If we are close to the map boundary, move away from that direction
+                    if(checkCardinalOnMap(dir)){
+                        //Go in the next direction
+                        currentExploreDirection = currentExploreDirection.rotateRight();
+                        currentBoundaryCooldown += baseBoundaryCooldown;
+                        currentExploreCooldown = baseExploreCooldown;
+                        break;
                     }
-                }
-            } else if (!haveBroadCastedMapBounds) {
-                broadcastMapBounds();
-                haveBroadCastedMapBounds = true;
-            } else {
-                return explore(Movement.randomDirection());
-                // explore(myLocation.directionTo(nearestArchon).opposite());
+                }                    
             }
-            return false;
+            
+            // If we run out of patience, try a new direction to explore.
+            if(currentExploreCooldown <= 0){
+                currentExploreDirection = directions[rand.nextInt(8)];
+                currentExploreCooldown += baseExploreCooldown;
+            }
+            rc.setIndicatorString(2, "Current explore cooldown is: " + Integer.toString(currentExploreCooldown));
+            rc.setIndicatorString(0, "Current explore direction is: " + currentExploreDirection.toString());
+            
+            return explore(currentExploreDirection);
+            
         }
+        
     }
 
     private static class ScoutMessaging {
@@ -261,6 +264,12 @@ public class ScoutPlayer extends RobotPlayer {
     
     public static void tick() throws GameActionException {
         ScoutMessaging.handleMessageQueue();
+        if(currentExploreCooldown > 0){
+            currentExploreCooldown--;            
+        }
+        if(currentBoundaryCooldown > 0){
+            currentBoundaryCooldown--;
+        }
         if (Util.countRobotsByRobotType(nearbyEnemies, RobotType.ARCHON) > 0 && broadCastCooldown > 0) {
             for (RobotInfo r : nearbyEnemies) {
                 if (r.type.equals(RobotType.ARCHON)) {

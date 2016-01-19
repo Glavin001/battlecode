@@ -95,6 +95,10 @@ public class RobotPlayer {
     static int messagesSentThisRound = 0;
     static int minClusterSeparation = 15*15; 
     static int clusterExpiry = 10;
+    static int currentExploreCooldown = 0;
+    static int baseExploreCooldown = 40; // Explore for 40 rounds
+    static int currentBoundaryCooldown = 0; 
+    static int baseBoundaryCooldown = 10; // Allow scouts 10 turns to get away from the wall
 
     /**
      * Movement
