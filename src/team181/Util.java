@@ -129,4 +129,24 @@ public class Util {
         return all;
     }
     
+    /**
+     * Number of turns it will take to clear
+     * @param rubble
+     * @return
+     */
+    public static double turnsToClearRubble(double rubble) {
+//        Amount left after clearing = max(95%*(original amount)-20,0)
+        double turns = rubble / GameConstants.RUBBLE_CLEAR_FLAT_AMOUNT;
+        return Math.max(0, turns);
+    }
+    
+    /**
+     * Number of turns it will take to clear enough rubble to move through it
+     * @param rubble
+     * @return
+     */
+    public static double turnsToClearRubbleToMove(double rubble) {
+        return turnsToClearRubble(rubble - GameConstants.RUBBLE_OBSTRUCTION_THRESH);
+    }
+    
 }

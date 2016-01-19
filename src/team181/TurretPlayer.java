@@ -1,6 +1,7 @@
 package team181;
 
 import battlecode.common.Clock;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -57,7 +58,7 @@ public class TurretPlayer extends RobotPlayer {
             if (nearestArchon != null) {
                 // I know where he is!
                 // Is he close?
-                rc.setIndicatorLine(myLocation, nearestArchon, 0, 0, 255);
+                rc.setIndicatorLine(myLocation, nearestArchon, 0, 100, 100);
                 int dist = myLocation.distanceSquaredTo(nearestArchon);
                 if (dist > maxArchonDistSquared) {
                     // Too far! Let's move closer
@@ -70,8 +71,9 @@ public class TurretPlayer extends RobotPlayer {
                     } else {
                         // Yup, we can move
                         // Move closer!
-                        explore(myLocation.directionTo(nearestArchon));
-                        return;
+                        if (explore(myLocation.directionTo(nearestArchon))) {
+                            return;
+                        }
                     }
                 } else if (dist < minArchonDistSquared) {
                     // too close! Give the archon some space!
@@ -84,8 +86,9 @@ public class TurretPlayer extends RobotPlayer {
                     } else {
                         // Yup, we can move
                         // Move away!
-                        explore(myLocation.directionTo(nearestArchon).opposite());
-                        return;
+                        if (explore(myLocation.directionTo(nearestArchon).opposite())) {
+                            return;
+                        }
                     }
                 } else {
                     // All good
@@ -110,6 +113,17 @@ public class TurretPlayer extends RobotPlayer {
             }
         }
 
+    }
+    
+    public static boolean explore(Direction dirToMove) throws GameActionException {
+        if (rc.isCoreReady()) {
+            Direction bestDir = leastRiskyDirection(dirToMove);
+            if (!bestDir.equals(Direction.NONE)) {
+                rc.move(bestDir);
+                return true;
+            }
+        }
+        return false;
     }
 
 }

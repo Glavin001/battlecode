@@ -180,6 +180,14 @@ public class ArchonPlayer extends RobotPlayer {
         }
 
         // Priorities
+        // Activating Neutrals
+        RobotInfo[] neutralRobots = rc.senseNearbyRobots(-1, Team.NEUTRAL);
+        if (neutralRobots.length > 0) {
+            if (activateNeutrals(neutralRobots)) {
+                return;
+            }
+        }
+
         // Building
         if (Building.tryBuildUnit(nextRobotTypeToBuild())) {
             return;
@@ -202,13 +210,6 @@ public class ArchonPlayer extends RobotPlayer {
                 }
             }
         }
-        // Activating Neutrals
-        RobotInfo[] neutralRobots = rc.senseNearbyRobots(-1, Team.NEUTRAL);
-        if (neutralRobots.length > 0) {
-            if (activateNeutrals(neutralRobots)) {
-                return;
-            }
-        }
 
         // Repairing
         if (repairAllies(nearbyAllies)) {
@@ -229,7 +230,6 @@ public class ArchonPlayer extends RobotPlayer {
                 rc.move(bestDir);
                 rc.setIndicatorString(1, "Moving towards neutral robot: " + Integer.toString(neutralRobot.ID));
                 rc.setIndicatorLine(myLocation, loc, 50, 255, 50);
-                ;
                 return;
             }
         }
@@ -277,10 +277,9 @@ public class ArchonPlayer extends RobotPlayer {
                 // Determine best part
                 MapLocation loc = bestLocationForParts(partLocations);
                 Direction dirToMove = myLocation.directionTo(loc);
-                Direction bestDir = leastRiskyDirection(dirToMove);
+                Direction bestDir = leastRiskyDirection(dirToMove, true);
                 if (!bestDir.equals(Direction.NONE)) {
-                    rc.move(bestDir);
-                    return true;
+                    return Movement.moveOrClear(bestDir);
                 }
             }
         }
