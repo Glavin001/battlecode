@@ -15,6 +15,7 @@ public class RobotPlayer {
     public static int myPatience = 150;
     public static int basePatience = 150;
     public static boolean goingRight = true;
+    public static Random rand;
 
     public static boolean directMove(Direction dir) throws GameActionException{
         if(rc.canMove(dir)){
@@ -98,6 +99,7 @@ public class RobotPlayer {
 //                    }else{
 //                        goingRight = false;
 //                    }
+//                    goingRight = rand.nextBoolean();
 //                    if(goingRight){
                         nextDirection = getDirToTarget(myCurrentLocation, target).rotateRight();                                
 //                    }else{
@@ -165,7 +167,8 @@ public class RobotPlayer {
         previousLocations[0] = myCurrentLocation;
         previousLocations[1] = myCurrentLocation;
         boolean atTarget = false;
-        Random rand = new Random(rc.getID());
+        rand = new Random(rc.getID());
+
         while(true){
             try{
                 myCurrentLocation = rc.getLocation();
